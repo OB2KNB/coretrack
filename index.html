@@ -571,25 +571,7 @@ async function generateOfficialPdfTest(fiche){
     document.getElementById("saveToHistory").disabled = false;
     alert("PDF généré (brouillon) et téléchargé. Prochaine étape : PDF officiel.");
   });
-document.getElementById("generateOfficialPdf").addEventListener("click", async ()=>{
-  if(!hasSig){
-    alert("Signe d’abord avant de générer le PDF officiel.");
-    return;
-  }
 
-  const fiche = currentFicheData();
-  if(!fiche.week){
-    alert("Renseigne la semaine (ex: S39 2026).");
-    return;
-  }
-
-  const bytes = await generateOfficialPdfTest(fiche);
-
-  const filename = `CoreTrack_OFFICIEL_${fiche.week.replace(/\s+/g,"_")}.pdf`
-    .replace(/[^\w\-\.]+/g,"_");
-
-  downloadBytes(bytes, filename);
-});
   // ---------- History ----------
   function loadHistory(){
     try{ return JSON.parse(localStorage.getItem(KEY_HISTORY) || "[]"); }catch{ return []; }
