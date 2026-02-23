@@ -605,8 +605,13 @@ document.getElementById("generateOfficialPdf").addEventListener("click", async (
 // --- Justificatifs : ouvrir la caméra ---
 
 // --- Affichage des justificatifs ---
+const addReceiptBtn = document.getElementById("addReceiptBtn");
 const receiptInput = document.getElementById("receiptInput");
 const receiptList = document.getElementById("receiptList");
+
+addReceiptBtn.addEventListener("click", () => {
+  receiptInput.click();
+});
 
 receiptInput.addEventListener("change", (e) => {
   const file = e.target.files[0];
