@@ -603,14 +603,7 @@ document.getElementById("generateOfficialPdf").addEventListener("click", async (
   downloadBytes(bytes, filename);
 });
 // --- Justificatifs : ouvrir la caméra ---
-window.addEventListener("DOMContentLoaded", () => {
-  alert("JS chargé");
-  const btn = document.getElementById("addReceiptBtn");
-  const input = document.getElementById("receiptInput");
-  if(!btn || !input) return;
 
-  btn.addEventListener("click", () => input.click());
-});
 // --- Affichage des justificatifs ---
 const receiptInput = document.getElementById("receiptInput");
 const receiptList = document.getElementById("receiptList");
