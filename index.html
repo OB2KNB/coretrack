@@ -606,8 +606,12 @@ document.getElementById("generateOfficialPdf").addEventListener("click", async (
   downloadBytes(bytes, filename);
 });
 // --- Justificatifs : ouvrir la caméra ---
-document.getElementById("addReceiptBtn").addEventListener("click", ()=>{
-  document.getElementById("receiptInput").click();
+window.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("addReceiptBtn");
+  const input = document.getElementById("receiptInput");
+  if(!btn || !input) return;
+
+  btn.addEventListener("click", () => input.click());
 });
   // ---------- History ----------
   function loadHistory(){
