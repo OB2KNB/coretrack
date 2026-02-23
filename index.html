@@ -492,7 +492,53 @@
 
     return await pdfDoc.save();
   }
+async function generateOfficialPdfTest(fiche){
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
 
+  // Charge le template PDF officiel du repo
+  const existingPdfBytes = await fetch("./template.pdf").then(r => r.arrayBuffer());
+
+  const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const pages = pdfDoc.getPages();
+  const page = pages[0];
+
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+  // Coordonnées TEST (on ajustera après)
+  page.drawText(`${fiche.profile.last} ${fiche.profile.first}`.trim(), {
+    x: 60,
+    y: 770,
+    size: 12,
+    font,
+    color: rgb(0,0,0),
+  });
+
+  page.drawText(`${fiche.week}`, {
+    x: 410,
+    y: 770,
+    size: 12,
+    font,
+    color: rgb(0,0,0),
+  });
+
+  page.drawText(`${fiche.profile.plate}`, {
+    x: 270,
+    y: 735,
+    size: 11,
+    font,
+    color: rgb(0,0,0),
+  });
+
+  // Signature (test) — provisoire en bas
+  if (hasSig) {
+    const pngDataUrl = canvas.toDataURL("image/png");
+    const pngBytes = await fetch(pngDataUrl).then(r=>r.arrayBuffer());
+    const png = await pdfDoc.embedPng(pngBytes);
+    page.drawImage(png, { x: 300, y: 60, width: 200, height: 60 });
+  }
+
+  return await pdfDoc.save();
+}
   function downloadBytes(bytes, filename){
     const blob = new Blob([bytes], {type:"application/pdf"});
     const url = URL.createObjectURL(blob);
