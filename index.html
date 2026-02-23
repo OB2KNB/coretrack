@@ -1,11 +1,664 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>CoreTrack</title>
+
+  <style>
+    :root{
+      --bg:#0b0b0b; --panel:#111; --line:#222; --text:#f2f2f2; --muted:#b8b8b8;
+      --btn:#1d1d1d; --btn2:#141414; --accent:#ff7a00;
+      font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    body{margin:0;background:var(--bg);color:var(--text)}
+    header{position:sticky;top:0;background:#111;border-bottom:1px solid var(--line);padding:12px 14px;z-index:10}
+    .brand{font-weight:800;letter-spacing:.3px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tab{border:1px solid #2a2a2a;background:var(--btn2);color:var(--text);padding:10px 12px;border-radius:10px}
+    .tab.active{background:var(--btn);border-color:#3a3a3a}
+    main{padding:14px;max-width:980px;margin:0 auto}
+    .panel{display:none}
+    .panel.active{display:block}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+    .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    @media (max-width:720px){.row{grid-template-columns:1fr}}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #2a2a2a;background:#0f0f0f;color:var(--text)}
+    textarea{min-height:88px;resize:vertical}
+    h2{margin:6px 0 10px}
+    h3{margin:0 0 10px}
+    .hint{color:var(--muted);font-size:13px;line-height:1.35}
+    .totals{margin-top:10px;color:var(--muted);font-size:14px;display:flex;flex-wrap:wrap;gap:14px}
+    .totals b{color:var(--text)}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{border:1px solid #2a2a2a;background:var(--btn);color:var(--text);padding:12px 14px;border-radius:12px}
+    .btn.primary{border-color:#ff9a3d;background:linear-gradient(180deg,#ff8a1c,#ff6f00);color:#111;font-weight:800}
+    .btn.danger{border-color:#5a2222;background:#2a0f0f}
+    .btn:disabled{opacity:.55}
+    canvas{width:100%;height:auto;border-radius:12px;border:1px dashed #2f2f2f;background:#0c0c0c;touch-action:none}
+    .list{display:grid;gap:10px}
+    .item{border:1px solid #2a2a2a;background:#0f0f0f;border-radius:12px;padding:12px}
+    .itemTop{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .badge{font-size:12px;color:#111;background:#f2f2f2;border-radius:999px;padding:4px 10px;font-weight:700}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .sep{height:1px;background:#202020;margin:12px 0}
+  </style>
+
+  <!-- pdf-lib (pour sortir un PDF simple pour l’instant) -->
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
-<body style="background:#0b0b0b;color:white;font-family:sans-serif;text-align:center;padding-top:50px;">
-  <h1>CoreTrack</h1>
-  <p>L’application démarre.</p>
+
+<body>
+<header>
+  <div class="brand">CoreTrack</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="new">Nouvelle fiche</button>
+    <button class="tab" data-tab="history">Historique</button>
+    <button class="tab" data-tab="profile">Profil</button>
+  </div>
+</header>
+
+<main>
+  <!-- NEW -->
+  <section class="panel active" id="panel-new">
+    <h2>Nouvelle fiche</h2>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Semaine (ex: S39 2026)</label>
+          <input id="week" placeholder="S__ 2026" />
+        </div>
+        <div>
+          <label>Chantier</label>
+          <input id="site" placeholder="Nom chantier" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Statut chantier</label>
+          <select id="status180">
+            <option value="lt">Moins de 180 jours sur ce chantier</option>
+            <option value="ge">180 jours et + sur ce chantier</option>
+          </select>
+        </div>
+        <div>
+          <label>Avance reçue (si besoin)</label>
+          <input id="advance" type="number" step="0.01" value="0" />
+        </div>
+      </div>
+
+      <p class="hint" style="margin-top:10px">
+        Règle: TVA laissée vide. La direction signe plus tard.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Forfaits</h3>
+      <div class="row">
+        <div>
+          <label>Repas midi (nb)</label>
+          <input id="qtyLunch" type="number" min="0" max="20" value="0" />
+        </div>
+        <div>
+          <label>Repas soir (nb)</label>
+          <input id="qtyDinner" type="number" min="0" max="20" value="0" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Nuitées (nb) (par nuit)</label>
+          <input id="qtyNights" type="number" min="0" max="20" value="0" />
+        </div>
+        <div>
+          <label>Autres frais (€) (péage/parking/divers)</label>
+          <input id="otherFees" type="number" step="0.01" value="0" />
+        </div>
+      </div>
+
+      <div class="totals">
+        <div>Tarif repas : <b id="mealRateLabel">21,40 €</b></div>
+        <div>Tarif nuitée : <b id="nightRateLabel">56,80 €</b></div>
+        <div>Total forfaits : <b id="forfaitTotal">0,00 €</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Kilométrique (option)</h3>
+      <div class="row">
+        <div>
+          <label>Kilomètres (total)</label>
+          <input id="kmTotal" type="number" min="0" step="1" value="0" />
+        </div>
+        <div>
+          <label>Taux km</label>
+          <input id="kmRate" type="number" step="0.01" value="0.35" />
+        </div>
+      </div>
+      <div class="totals">
+        <div>Total km : <b id="kmMoney">0,00 €</b></div>
+        <div>Total général : <b id="grandTotal">0,00 €</b></div>
+        <div>Montant à rembourser : <b id="toRefund">0,00 €</b></div>
+      </div>
+      <div id="negWarn" class="hint" style="display:none;color:#ff9a9a;margin-top:8px">
+        Attention : avance supérieure au total (montant à rembourser négatif).
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Signature</h3>
+      <canvas id="sig" width="900" height="260"></canvas>
+      <div class="btns">
+        <button class="btn" id="clearSig" type="button">Effacer</button>
+        <button class="btn primary" id="generatePdf" type="button">Générer PDF</button>
+        <button class="btn" id="saveToHistory" type="button" disabled>Enregistrer dans l’historique</button>
+      </div>
+      <p class="hint" style="margin-top:10px">
+        Destinataire recommandé : <b>jennifer.francois1@framatome.com</b><br/>
+        Objet recommandé : <b>Note de frais {Semaine} – NOM Prénom</b><br/>
+        (iPhone : ensuite tu fais “Partager” le PDF → Mail)
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>PDF officiel (étape suivante)</h3>
+      <p class="hint">
+        Là on génère un PDF “brouillon” pour valider le fonctionnement.<br/>
+        Ensuite on branchera le <b>template PDF officiel</b> et on écrira par-dessus au bon endroit.
+      </p>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="panel" id="panel-history">
+    <h2>Historique</h2>
+    <div class="card">
+      <div class="btns">
+        <button class="btn" id="exportBackup" type="button">Exporter sauvegarde</button>
+        <label class="btn" style="cursor:pointer">
+          Importer sauvegarde
+          <input id="importBackup" type="file" accept="application/json" hidden />
+        </label>
+        <button class="btn danger" id="clearHistory" type="button">Vider</button>
+      </div>
+      <p class="hint" style="margin-top:10px">
+        Historique stocké sur le téléphone. On garde les 30 dernières fiches.
+      </p>
+    </div>
+    <div id="historyList" class="list"></div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="panel" id="panel-profile">
+    <h2>Profil</h2>
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Nom</label>
+          <input id="pLast" placeholder="NOM" />
+        </div>
+        <div>
+          <label>Prénom</label>
+          <input id="pFirst" placeholder="Prénom" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label>Immatriculation (défaut)</label>
+          <input id="pPlate" placeholder="AA-123-BB" />
+        </div>
+        <div>
+          <label>Email secrétaire</label>
+          <input id="pTo" type="email" value="jennifer.francois1@framatome.com" />
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="btn primary" id="saveProfile" type="button">Enregistrer</button>
+        <button class="btn" id="resetProfile" type="button">Réinitialiser</button>
+      </div>
+
+      <div class="sep"></div>
+      <p class="hint">
+        Le profil est enregistré sur le téléphone et sera prérempli automatiquement.
+      </p>
+    </div>
+  </section>
+</main>
+
+<script>
+  // ---------- Storage keys ----------
+  const KEY_PROFILE = "coretrack_profile_v1";
+  const KEY_HISTORY = "coretrack_history_v1";
+  const HISTORY_MAX = 30;
+
+  // ---------- Helpers ----------
+  const € = (n) => {
+    const x = (Math.round((Number(n)||0)*100)/100).toFixed(2);
+    return x.replace(".", ",") + " €";
+  };
+  const nowIso = () => new Date().toISOString();
+  const safeNum = (v) => {
+    const n = Number(String(v).replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  // ---------- Tabs ----------
+  document.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+      document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+      document.getElementById("panel-"+tab).classList.add("active");
+      if(tab==="history") renderHistory();
+      if(tab==="profile") loadProfileToUI();
+    });
+  });
+
+  // ---------- Rates ----------
+  function getRates(){
+    const status = document.getElementById("status180").value;
+    if(status==="ge"){
+      return { meal: 18.20, night: 48.30 };
+    }
+    return { meal: 21.40, night: 56.80 };
+  }
+
+  function recalc(){
+    const rates = getRates();
+    document.getElementById("mealRateLabel").textContent = €(rates.meal);
+    document.getElementById("nightRateLabel").textContent = €(rates.night);
+
+    const lunch = safeNum(document.getElementById("qtyLunch").value);
+    const dinner = safeNum(document.getElementById("qtyDinner").value);
+    const nights = safeNum(document.getElementById("qtyNights").value);
+    const otherFees = safeNum(document.getElementById("otherFees").value);
+
+    const km = safeNum(document.getElementById("kmTotal").value);
+    const kmRate = safeNum(document.getElementById("kmRate").value);
+
+    const forfaits = (lunch + dinner) * rates.meal + nights * rates.night;
+    const kmMoney = km * kmRate;
+    const total = forfaits + kmMoney + otherFees;
+
+    const advance = safeNum(document.getElementById("advance").value);
+    const toRefund = total - advance;
+
+    document.getElementById("forfaitTotal").textContent = €(forfaits);
+    document.getElementById("kmMoney").textContent = €(kmMoney);
+    document.getElementById("grandTotal").textContent = €(total);
+    document.getElementById("toRefund").textContent = €(toRefund);
+
+    document.getElementById("negWarn").style.display = (toRefund < 0) ? "block" : "none";
+  }
+
+  ["status180","qtyLunch","qtyDinner","qtyNights","otherFees","kmTotal","kmRate","advance"].forEach(id=>{
+    document.getElementById(id).addEventListener("input", recalc);
+    document.getElementById(id).addEventListener("change", recalc);
+  });
+  recalc();
+
+  // ---------- Signature pad ----------
+  const canvas = document.getElementById("sig");
+  const ctx = canvas.getContext("2d");
+  ctx.lineWidth = 4;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#f2f2f2";
+  let drawing = false;
+  let hasSig = false;
+
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches && e.touches[0];
+    const clientX = touch ? touch.clientX : e.clientX;
+    const clientY = touch ? touch.clientY : e.clientY;
+    return { x: (clientX - rect.left) * (canvas.width / rect.width),
+             y: (clientY - rect.top) * (canvas.height / rect.height) };
+  }
+
+  function startDraw(e){
+    drawing = true;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    e.preventDefault();
+  }
+  function moveDraw(e){
+    if(!drawing) return;
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    hasSig = true;
+    document.getElementById("saveToHistory").disabled = true; // faudra régénérer PDF
+    e.preventDefault();
+  }
+  function endDraw(){
+    drawing = false;
+  }
+
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("mousemove", moveDraw);
+  window.addEventListener("mouseup", endDraw);
+
+  canvas.addEventListener("touchstart", startDraw, {passive:false});
+  canvas.addEventListener("touchmove", moveDraw, {passive:false});
+  canvas.addEventListener("touchend", endDraw);
+
+  document.getElementById("clearSig").addEventListener("click", ()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    hasSig = false;
+    document.getElementById("saveToHistory").disabled = true;
+  });
+
+  // ---------- Profile ----------
+  function loadProfile(){
+    try{ return JSON.parse(localStorage.getItem(KEY_PROFILE) || "{}"); }catch{ return {}; }
+  }
+  function saveProfile(p){
+    localStorage.setItem(KEY_PROFILE, JSON.stringify(p));
+  }
+  function loadProfileToUI(){
+    const p = loadProfile();
+    document.getElementById("pLast").value = p.last || "";
+    document.getElementById("pFirst").value = p.first || "";
+    document.getElementById("pPlate").value = p.plate || "";
+    document.getElementById("pTo").value = p.to || "jennifer.francois1@framatome.com";
+  }
+  loadProfileToUI();
+
+  document.getElementById("saveProfile").addEventListener("click", ()=>{
+    const p = {
+      last: document.getElementById("pLast").value.trim(),
+      first: document.getElementById("pFirst").value.trim(),
+      plate: document.getElementById("pPlate").value.trim(),
+      to: document.getElementById("pTo").value.trim() || "jennifer.francois1@framatome.com"
+    };
+    saveProfile(p);
+    alert("Profil enregistré.");
+  });
+
+  document.getElementById("resetProfile").addEventListener("click", ()=>{
+    localStorage.removeItem(KEY_PROFILE);
+    loadProfileToUI();
+    alert("Profil réinitialisé.");
+  });
+
+  // ---------- Build current data object ----------
+  function currentFicheData(){
+    const rates = getRates();
+    const p = loadProfile();
+    const week = document.getElementById("week").value.trim();
+    const site = document.getElementById("site").value.trim();
+    const status180 = document.getElementById("status180").value;
+
+    const lunch = safeNum(document.getElementById("qtyLunch").value);
+    const dinner = safeNum(document.getElementById("qtyDinner").value);
+    const nights = safeNum(document.getElementById("qtyNights").value);
+    const otherFees = safeNum(document.getElementById("otherFees").value);
+
+    const km = safeNum(document.getElementById("kmTotal").value);
+    const kmRate = safeNum(document.getElementById("kmRate").value);
+
+    const advance = safeNum(document.getElementById("advance").value);
+
+    const forfaits = (lunch + dinner) * rates.meal + nights * rates.night;
+    const kmMoney = km * kmRate;
+    const total = forfaits + kmMoney + otherFees;
+    const toRefund = total - advance;
+
+    return {
+      createdAt: nowIso(),
+      profile: { last:p.last||"", first:p.first||"", plate:p.plate||"", to:p.to||"jennifer.francois1@framatome.com" },
+      week, site,
+      status180,
+      rates,
+      qty: { lunch, dinner, nights },
+      km: { total: km, rate: kmRate, money: kmMoney },
+      otherFees,
+      totals: { forfaits, total, advance, toRefund }
+    };
+  }
+
+  // ---------- PDF generation (brouillon) ----------
+  let lastPdfBytes = null;
+  let lastFicheObj = null;
+
+  async function generateDraftPdf(fiche){
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595.28, 841.89]); // A4 portrait points
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const margin = 40;
+    let y = 800;
+
+    page.drawText("CoreTrack - Note de frais (Brouillon)", { x: margin, y, size: 16, font: fontB, color: rgb(0.1,0.1,0.1) });
+    y -= 28;
+
+    const p = fiche.profile;
+    const line = (label, value) => {
+      page.drawText(label, { x: margin, y, size: 11, font: fontB, color: rgb(0.15,0.15,0.15) });
+      page.drawText(String(value ?? ""), { x: margin+160, y, size: 11, font });
+      y -= 18;
+    };
+
+    line("Nom / Prénom:", `${p.last} ${p.first}`.trim());
+    line("Immatriculation:", p.plate);
+    line("Semaine:", fiche.week);
+    line("Chantier:", fiche.site);
+    line("Statut chantier:", fiche.status180==="ge" ? "180 jours et + (dégressif)" : "Moins de 180 jours");
+    y -= 8;
+
+    page.drawText("Forfaits", { x: margin, y, size: 13, font: fontB }); y -= 18;
+    line("Repas midi (nb):", fiche.qty.lunch);
+    line("Repas soir (nb):", fiche.qty.dinner);
+    line("Nuitées (nb):", fiche.qty.nights);
+    line("Tarif repas:", €(fiche.rates.meal));
+    line("Tarif nuitée:", €(fiche.rates.night));
+    line("Total forfaits:", €(fiche.totals.forfaits));
+    y -= 8;
+
+    page.drawText("Kilométrique", { x: margin, y, size: 13, font: fontB }); y -= 18;
+    line("Km total:", fiche.km.total);
+    line("Taux km:", €(fiche.km.rate));
+    line("Total km:", €(fiche.km.money));
+    y -= 8;
+
+    page.drawText("Synthèse", { x: margin, y, size: 13, font: fontB }); y -= 18;
+    line("Autres frais:", €(fiche.otherFees));
+    line("Total général:", €(fiche.totals.total));
+    line("Avance reçue:", €(fiche.totals.advance));
+    line("Montant à rembourser:", €(fiche.totals.toRefund));
+
+    // signature image
+    if(hasSig){
+      const pngDataUrl = canvas.toDataURL("image/png");
+      const pngBytes = await fetch(pngDataUrl).then(r=>r.arrayBuffer());
+      const png = await pdfDoc.embedPng(pngBytes);
+      const sigW = 220, sigH = 70;
+      page.drawText("Signature:", { x: margin, y: 140, size: 12, font: fontB });
+      page.drawImage(png, { x: margin+120, y: 110, width: sigW, height: sigH });
+      page.drawText("Date:", { x: margin, y: 90, size: 11, font: fontB });
+      page.drawText(new Date().toLocaleDateString("fr-FR"), { x: margin+120, y: 90, size: 11, font });
+    } else {
+      page.drawText("Signature: (manquante)", { x: margin, y: 120, size: 12, font: fontB, color: rgb(0.6,0.1,0.1) });
+    }
+
+    return await pdfDoc.save();
+  }
+
+  function downloadBytes(bytes, filename){
+    const blob = new Blob([bytes], {type:"application/pdf"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 3000);
+  }
+
+  document.getElementById("generatePdf").addEventListener("click", async ()=>{
+    if(!hasSig){
+      alert("Signe d’abord avant de générer le PDF.");
+      return;
+    }
+    const fiche = currentFicheData();
+    if(!fiche.week){
+      alert("Renseigne la semaine (ex: S39 2026).");
+      return;
+    }
+    lastFicheObj = fiche;
+    lastPdfBytes = await generateDraftPdf(fiche);
+
+    const filename = `CoreTrack_${fiche.week.replace(/\s+/g,"_")}_${(fiche.profile.last||"NOM")}_${(fiche.profile.first||"Prenom")}.pdf`
+      .replace(/[^\w\-\.]+/g,"_");
+
+    downloadBytes(lastPdfBytes, filename);
+    document.getElementById("saveToHistory").disabled = false;
+    alert("PDF généré (brouillon) et téléchargé. Prochaine étape : PDF officiel.");
+  });
+
+  // ---------- History ----------
+  function loadHistory(){
+    try{ return JSON.parse(localStorage.getItem(KEY_HISTORY) || "[]"); }catch{ return []; }
+  }
+  function saveHistory(arr){
+    localStorage.setItem(KEY_HISTORY, JSON.stringify(arr.slice(0, HISTORY_MAX)));
+  }
+
+  document.getElementById("saveToHistory").addEventListener("click", ()=>{
+    if(!lastFicheObj || !lastPdfBytes){
+      alert("Génère d’abord le PDF.");
+      return;
+    }
+    const entry = {
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+      createdAt: lastFicheObj.createdAt,
+      week: lastFicheObj.week,
+      site: lastFicheObj.site,
+      total: lastFicheObj.totals.total,
+      toRefund: lastFicheObj.totals.toRefund,
+      pdfBase64: btoa(String.fromCharCode(...new Uint8Array(lastPdfBytes))),
+      meta: lastFicheObj
+    };
+    const hist = loadHistory();
+    hist.unshift(entry);
+    saveHistory(hist);
+    alert("Enregistré dans l’historique.");
+    document.getElementById("saveToHistory").disabled = true;
+  });
+
+  function base64ToBytes(b64){
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  function renderHistory(){
+    const list = document.getElementById("historyList");
+    const hist = loadHistory();
+    if(hist.length===0){
+      list.innerHTML = `<div class="card"><p class="hint">Aucune fiche enregistrée pour l’instant.</p></div>`;
+      return;
+    }
+    list.innerHTML = "";
+    hist.forEach(entry=>{
+      const d = new Date(entry.createdAt);
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="itemTop">
+          <div><b>${entry.week}</b> — ${entry.site || "<span class='mono'>chantier</span>"}</div>
+          <div class="badge">${€(entry.toRefund)}</div>
+        </div>
+        <div class="hint" style="margin-top:6px">
+          Créé le ${d.toLocaleDateString("fr-FR")} à ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+          • Total ${€(entry.total)}
+        </div>
+        <div class="btns" style="margin-top:10px">
+          <button class="btn" data-act="download">Télécharger PDF</button>
+          <button class="btn" data-act="duplicate">Dupliquer</button>
+          <button class="btn danger" data-act="delete">Supprimer</button>
+        </div>
+      `;
+      el.querySelector('[data-act="download"]').addEventListener("click", ()=>{
+        const bytes = base64ToBytes(entry.pdfBase64);
+        const fname = `CoreTrack_${entry.week.replace(/\s+/g,"_")}.pdf`.replace(/[^\w\-\.]+/g,"_");
+        downloadBytes(bytes, fname);
+      });
+      el.querySelector('[data-act="duplicate"]').addEventListener("click", ()=>{
+        // Replonge l'utilisateur sur Nouvelle fiche avec valeurs préremplies
+        document.querySelector('.tab[data-tab="new"]').click();
+        document.getElementById("week").value = entry.meta.week;
+        document.getElementById("site").value = entry.meta.site || "";
+        document.getElementById("status180").value = entry.meta.status180 || "lt";
+        document.getElementById("advance").value = entry.meta.totals.advance || 0;
+        document.getElementById("qtyLunch").value = entry.meta.qty.lunch || 0;
+        document.getElementById("qtyDinner").value = entry.meta.qty.dinner || 0;
+        document.getElementById("qtyNights").value = entry.meta.qty.nights || 0;
+        document.getElementById("otherFees").value = entry.meta.otherFees || 0;
+        document.getElementById("kmTotal").value = entry.meta.km.total || 0;
+        document.getElementById("kmRate").value = entry.meta.km.rate || 0.35;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        hasSig = false;
+        document.getElementById("saveToHistory").disabled = true;
+        recalc();
+      });
+      el.querySelector('[data-act="delete"]').addEventListener("click", ()=>{
+        if(!confirm("Supprimer cette fiche de l’historique ?")) return;
+        const newHist = loadHistory().filter(h=>h.id!==entry.id);
+        saveHistory(newHist);
+        renderHistory();
+      });
+      list.appendChild(el);
+    });
+  }
+
+  document.getElementById("clearHistory").addEventListener("click", ()=>{
+    if(!confirm("Vider tout l’historique ?")) return;
+    localStorage.removeItem(KEY_HISTORY);
+    renderHistory();
+  });
+
+  document.getElementById("exportBackup").addEventListener("click", ()=>{
+    const payload = {
+      version: 1,
+      exportedAt: nowIso(),
+      profile: loadProfile(),
+      history: loadHistory()
+    };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "coretrack_backup.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 3000);
+  });
+
+  document.getElementById("importBackup").addEventListener("change", async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const text = await file.text();
+    let payload;
+    try{ payload = JSON.parse(text); }catch{ alert("Fichier invalide."); return; }
+    if(payload.profile) saveProfile(payload.profile);
+    if(Array.isArray(payload.history)) saveHistory(payload.history);
+    alert("Sauvegarde importée.");
+    renderHistory();
+  });
+
+  // preload profile once in new panel usage (no auto-fill needed, but profile used in PDF filename)
+</script>
 </body>
 </html>
