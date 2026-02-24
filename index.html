@@ -164,14 +164,18 @@
       </p>
     </div>
   <div class="card">
-  <h2>Justificatifs</h2>
+ <h2>Justificatifs</h2>
 
-<button class="btn" id="addReceiptBtn" type="button">Ajouter justificatif</button>
+<label class="btn" for="receiptInput">
+  Ajouter justificatif
+</label>
 
-<input type="file"
-       id="receiptInput"
-       accept="image/*"
-       style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;" />
+<input
+  type="file"
+  id="receiptInput"
+  accept="image/*"
+  style="position:absolute; left:-9999px; opacity:0;"
+/>
 
 <div id="receiptList" style="margin-top:15px;"></div>
 </div>
