@@ -318,7 +318,16 @@
     document.getElementById(id).addEventListener("change", recalc);
   });
   recalc();
+// =================== GLOBAL STATE ===================
+let drawing = false;
+let hasSig = false;
 
+let lastPdfBytes = null;
+let lastFicheObj = null;
+
+// Justificatifs (images sélectionnées)
+let receipts = []; // on stockera les dataURL ici
+// ====================================================
   // ---------- Signature pad ----------
   const canvas = document.getElementById("sig");
   const ctx = canvas.getContext("2d");
