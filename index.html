@@ -620,7 +620,8 @@ const receiptInput = document.getElementById("receiptInput");
 const receiptList  = document.getElementById("receiptList");
 
 if (receiptInput && receiptList) {
-  receiptInput.addEventListener("change", (e) => {
+receiptInput.addEventListener("change", (e) => {
+  alert("change déclenché");
     const file = e.target.files[0];
     if (!file) return;
 
