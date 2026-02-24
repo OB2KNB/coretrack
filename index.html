@@ -619,7 +619,37 @@ document.getElementById("generateOfficialPdf").addEventListener("click", async (
 // --- Affichage des justificatifs ---
 const receiptInput = document.getElementById("receiptInput");
 const receiptList  = document.getElementById("receiptList");
+window.addEventListener("DOMContentLoaded", () => {
 
+  const receiptInput = document.getElementById("receiptInput");
+  const receiptList  = document.getElementById("receiptList");
+
+  if (!receiptInput || !receiptList) return;
+
+  receiptInput.addEventListener("change", (e) => {
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+      receipts.push({
+        name: file.name || "justificatif.jpg",
+        dataUrl: reader.result
+      });
+
+      receiptList.innerHTML =
+        `<div class="hint">✅ ${receipts.length} justificatif(s) ajouté(s)</div>`;
+
+      receiptInput.value = "";
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+});
 
   // ---------- History ----------
   function loadHistory(){
