@@ -625,15 +625,19 @@ if (receiptInput && receiptList) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(event) {
-      const img = document.createElement("img");
-      img.src = event.target.result;
-      img.style.width = "100px";
-      img.style.margin = "8px";
-      img.style.borderRadius = "8px";
-      receiptList.appendChild(img);
-    };
-    reader.readAsDataURL(file);
+reader.onload = () => {
+    receipts.push({
+        name: file.name || "justificatif.jpg",
+        dataUrl: reader.result
+    });
+
+    receiptList.innerHTML =
+        `<div class="hint">✅ ${receipts.length} justificatif(s) ajouté(s)</div>`;
+
+    receiptInput.value = "";
+};
+
+reader.readAsDataURL(file);
   });
 }
   // ---------- History ----------
