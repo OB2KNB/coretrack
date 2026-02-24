@@ -617,23 +617,21 @@ document.getElementById("generateOfficialPdf").addEventListener("click", async (
 
 // --- Affichage des justificatifs ---
 
-
-
+  // --- Justificatifs ---
+window.addEventListener("DOMContentLoaded", () => {
   const receiptInput = document.getElementById("receiptInput");
   const receiptList  = document.getElementById("receiptList");
 
-  if (!receiptInput || !receiptList) return;
+  if (!receiptInput) { alert("receiptInput NULL"); return; }
+  if (!receiptList)  { alert("receiptList NULL"); return; }
 
-if (!receiptInput) alert("receiptInput NULL");
-if (!receiptList) alert("receiptList NULL");
-
-    const file = e.target.files[0];
+  receiptInput.addEventListener("change", (e) => {
+    alert("CHANGE OK");
+    const file = e.target.files && e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-
     reader.onload = () => {
-
       receipts.push({
         name: file.name || "justificatif.jpg",
         dataUrl: reader.result
@@ -644,9 +642,9 @@ if (!receiptList) alert("receiptList NULL");
 
       receiptInput.value = "";
     };
-
     reader.readAsDataURL(file);
   });
+});
 
 
 
