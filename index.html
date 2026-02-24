@@ -624,7 +624,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   if (!receiptInput || !receiptList) return;
 
-  receiptInput.addEventListener("change", (e) => {
+if (!receiptInput) alert("receiptInput NULL");
+if (!receiptList) alert("receiptList NULL");
 
     const file = e.target.files[0];
     if (!file) return;
