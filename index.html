@@ -463,62 +463,43 @@ async function genPdf(fiche){
   pg(25);
   const doc=await PDFDocument.load(eb,{ignoreEncryption:true});
   const page=doc.getPages()[0];
-  // La page fait exactement 1144.2 x 1619.2 pts (mesuré sur la fiche exemple)
-  const H=1619.2;
+  // Dimensions exactes du template
+  const H=1588.7;
   const fn=await doc.embedFont(StandardFonts.Helvetica);
   const fb=await doc.embedFont(StandardFonts.HelveticaBold);
   // W: x et yTop (depuis le haut), convertis en y pdf-lib (depuis le bas)
   const W=(txt,x,yTop,sz=10,f=fn,col=rgb(0,0,0))=>{
-    if(!txt && txt!==0) return;
+    if(txt===null||txt===undefined||txt==="") return;
     page.drawText(String(txt),{x,y:H-yTop-sz+2,size:sz,font:f,color:col});
   };
   const p=fiche.profile;
 
   // === EN-TÊTE ===
-  // NOM : x=58.7 yTop=120.5 → on écrit juste après "NOM :"
-  W(p.last.toUpperCase(), 108, 120, 11, fb);
-  // Prénom : x=291.3 yTop=122.6 → après "Prénom :"
-  W(p.first, 370, 122, 11, fn);
-  // Semaine : x=490.1 yTop=122.6
-  W(fiche.weekNum, 490, 122, 10, fn);
-  // Mois/année : x=719.1 yTop=120.5
-  W(fiche.monthYear, 719, 120, 10, fn);
+  W(p.last.toUpperCase(), 106, 118, 11, fb);   // NOM
+  W(p.first,              364, 120, 11, fn);   // Prénom
+  W(fiche.weekNum,        481, 120, 10, fn);   // Semaine
+  W(fiche.monthYear,      706, 118, 10, fn);   // Mois/année
 
   // === SECTION KM ===
   if(fiche.vehicleType==="perso"){
-    // Immatriculation : après "N° Immatriculation véhicule :" x≈410
-    W(p.plate, 410, 157, 10, fn);
+    W(p.plate, 402, 154, 10, fn);  // Immatriculation
 
-    // Lignes trajets — sur la fiche exemple:
-    // EOTP ligne 1 (nature): yTop=200.7, x=176.1
-    // Date + nature: yTop=222.7, x=114.6 / 197.1
-    // Départ: yTop=218.7 x=402, Arrivée: yTop=222.7 x=490, KM: yTop=223.7 x=650
-    // Espacement entre trajets ~44pts
+    // Lignes trajets — espacement ~22pts, 2 lignes par trajet
     fiche.trajets.slice(0,4).forEach((t,i)=>{
-      const baseY = 200 + i*44;
-      W(t.eotp.substring(0,25),       176, baseY,    9, fn);  // EOTP nature (ligne 1)
-      W(t.date,                        114, baseY+22, 9, fn);  // Date
-      W(t.nature.substring(0,35),      197, baseY+22, 9, fn);  // Nature déplacement
-      W(t.depart.substring(0,18),      402, baseY+18, 9, fn);  // Lieu départ
-      W(t.arrivee.substring(0,18),     490, baseY+22, 9, fn);  // Lieu arrivée
-      W(String(safe(t.km)),            650, baseY+23, 9, fn);  // Nbre KM
-      // Montant = km * tarif (affiché dans colonne montant)
-      const mont = (safe(t.km)*T_KM);
-      if(mont>0) W(mont.toFixed(2)+"€", 720, baseY+23, 9, fn);
+      const baseY = 197 + i*43;
+      W(t.eotp.substring(0,22),      173, baseY,    9, fn);  // EOTP
+      W(t.date,                      112, baseY+21, 9, fn);  // Date
+      W(t.nature.substring(0,32),    194, baseY+21, 9, fn);  // Nature
+      W(t.depart.substring(0,16),    395, baseY+17, 9, fn);  // Départ
+      W(t.arrivee.substring(0,16),   481, baseY+21, 9, fn);  // Arrivée
+      W(String(safe(t.km)),          638, baseY+22, 9, fn);  // KM
+      const mont=safe(t.km)*T_KM;
+      if(mont>0) W(mont.toFixed(2), 706, baseY+22, 9, fn);  // Montant
     });
-    // Total 1 : x=764 yTop=381
-    if(fiche.totals.tK>0) W(fiche.totals.tK.toFixed(2)+" €", 720, 381, 10, fb);
+    if(fiche.totals.tK>0) W(fiche.totals.tK.toFixed(2)+" €", 700, 276, 10, fb); // Total 1
   }
 
   // === SECTION 2 : FRAIS EUROS ===
-  // Coordonnées exactes depuis la fiche exemple :
-  // Ligne 1 (nuitées): yTop=480.1, x enseigne=196.1, x montantHT=445.6, x TTC=750.9
-  // Ligne 2 (midi):    yTop=497.6
-  // Ligne 3 (soir):    yTop=520.1
-  // Ligne 4 (péage):   yTop=547.6
-  // Date colonne: x=114.6
-  // EOTP colonne: x=61.2
-
   const lines=[];
   if(fiche.forfaits.nuit>0) lines.push({
     date: fiche.periode||"",
@@ -539,45 +520,38 @@ async function genPdf(fiche){
     ttc:(fiche.forfaits.soir*T_SOIR).toFixed(2)+" €"
   });
   fiche.peages.forEach(pg2=>lines.push({
-    date: pg2.date||"",
-    enseigne:(pg2.enseigne||"Péage").substring(0,32),
-    ht: safe(pg2.montant).toFixed(2)+" €",
-    ttc: safe(pg2.montant).toFixed(2)+" €"
+    date:pg2.date||"",
+    enseigne:(pg2.enseigne||"Péage").substring(0,30),
+    ht:safe(pg2.montant).toFixed(2)+" €",
+    ttc:safe(pg2.montant).toFixed(2)+" €"
   }));
 
-  // Y de départ = 480, espacement = 22.5 pts entre chaque ligne
-  const S2_START = 480;
-  const S2_STEP  = 22.5;
+  // Première ligne section 2 : yTop=471, espacement=22pts
   lines.slice(0,11).forEach((l,i)=>{
-    const y = S2_START + i*S2_STEP;
-    W(fiche.eotp.substring(0,10), 61,  y, 8, fn);   // EOTP
-    W(l.date,                     114, y, 9, fn);   // Date
-    W(l.enseigne,                 196, y, 9, fn);   // Enseigne / Nature
-    W(l.ht,                       445, y, 9, fn);   // Montant HT
-    W(l.ttc,                      750, y, 9, fn);   // Montant TTC
+    const y = 471 + i*22;
+    W(fiche.eotp.substring(0,10), 60,  y, 8, fn);  // EOTP
+    W(l.date,                     112, y, 8, fn);  // Date
+    W(l.enseigne,                 192, y, 8, fn);  // Enseigne
+    W(l.ht,                       434, y, 8, fn);  // Montant HT
+    W(l.ttc,                      695, y, 8, fn);  // Montant TTC
   });
 
-  // Total 2 : yTop=727
-  const totTTC = fiche.totals.tF + fiche.totals.tP;
-  W(totTTC.toFixed(2)+" €", 442, 727, 10, fb);  // colonne HT
-  W(totTTC.toFixed(2)+" €", 751, 727, 10, fb);  // colonne TTC
+  // Total 2
+  const totTTC=fiche.totals.tF+fiche.totals.tP;
+  W(totTTC.toFixed(2)+" €", 434, 713, 10, fb);  // HT
+  W(totTTC.toFixed(2)+" €", 695, 713, 10, fb);  // TTC
 
   // === BAS DE PAGE ===
-  // Total général : x=298.2 yTop=1057.2
-  W(fmt(fiche.totals.grand), 298, 1057, 11, fb);
-  // Avance reçue : x=304.3 yTop=1088.9
-  W(fmt(fiche.totals.adv),   304, 1088, 11, fn);
-  // Montant à rembourser : x=298.2 yTop=1117.0
-  W(fmt(fiche.totals.remb),  298, 1117, 11, fb);
-  // Date salarié : x=521.1 yTop=1049.2
-  W(new Date().toLocaleDateString("fr-FR"), 521, 1049, 9, fn);
+  W(fmt(fiche.totals.grand), 293, 1037, 11, fb);  // Total général
+  W(fmt(fiche.totals.adv),   299, 1068, 11, fn);  // Avance reçue
+  W(fmt(fiche.totals.remb),  293, 1096, 11, fb);  // Montant à rembourser
+  W(new Date().toLocaleDateString("fr-FR"), 511, 1029, 9, fn);  // Date salarié
 
   // === SIGNATURE ===
   if(hasSig){
     const pb=await fetch(canvas.toDataURL("image/png")).then(r=>r.arrayBuffer());
     const png=await doc.embedPng(pb);
-    // Zone signature salarié : entre Date et Visa, x≈400, yTop≈1060-1100
-    page.drawImage(png,{x:400,y:H-1105,width:280,height:55});
+    page.drawImage(png,{x:392,y:H-1085,width:275,height:54});
   }
 
   pg(60);
