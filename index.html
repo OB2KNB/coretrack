@@ -471,6 +471,24 @@ async function genPdf(fiche){
     if(txt===null||txt===undefined||String(txt).trim()==="") return;
     page.drawText(String(txt),{x,y,size:sz,font:f,color:col});
   };
+  // Effacer tous les "0,00 €" et "-" bleus existants avec des rectangles blancs
+  const blanc=rgb(1,1,1);
+  const eff=(x0,y0,x1,y1)=>page.drawRectangle({x:x0-1,y:y0-1,width:(x1-x0)+4,height:(y1-y0)+3,color:blanc,borderWidth:0});
+  // Total 1
+  eff(731.2,1296.0,761.8,1307.0);
+  // Tirets "-" section 2 (colonne TTC)
+  [[1220.6,1230.6],[1198.1,1208.1],[1175.6,1185.6],[1153.1,1163.1],[1130.6,1140.6],
+   [1108.1,1118.1],[1085.6,1095.6],[1063.1,1073.1],[1040.6,1050.6],[1018.1,1028.1],[995.6,1005.6]
+  ].forEach(([y0,y1])=>eff(685,y0,770,y1));
+  // Total 2 (4 colonnes)
+  eff(453.7,950.1,484.3,961.1);
+  eff(548.7,950.1,579.3,961.1);
+  eff(634.7,950.1,665.3,961.1);
+  eff(731.2,950.1,761.8,961.1);
+  // Totaux bas de page
+  eff(303.5,620.0,334.1,631.0);
+  eff(303.5,588.2,334.1,599.2);
+  eff(303.5,560.1,334.1,571.1);
   const p=fiche.profile;
 
   // === EN-TÊTE ===
@@ -545,27 +563,25 @@ async function genPdf(fiche){
 
   lines.slice(0,11).forEach((l,i)=>{
     const y=S2_Y[i];
-    W(fiche.eotp.substring(0,10), 55,  y, 8, fn);  // EOTP/Affaires x0=55.4
+    W(fiche.eotp.substring(0,10), 55,  y, 8, fn);  // Affaires x0=55.4
     W(l.date,                     128, y, 8, fn);  // Date x0=127.9
-    W(l.enseigne,                 196, y, 8, fn);  // Enseigne x0=196.3 (après "Feuille")
-    W(l.ttc,                      695, y, 8, fn);  // Montant TTC x0=684.1
+    W(l.enseigne,                 196, y, 8, fn);  // Enseigne
+    // Colonne "Montant TTC" header est à x0=684.1 — on écrit dessus
+    W(l.ttc,                      684, y, 8, fn);
   });
 
-  // Total 2: y0=950.1
+  // Total 2 y0=950.1 — écraser les "0,00 €" existants exactement
   const totTTC=fiche.totals.tF+fiche.totals.tP;
-  W(totTTC.toFixed(2)+" €", 453, 950, 10, fb);  // colonne HT x0=453.7
-  W(totTTC.toFixed(2)+" €", 695, 950, 10, fb);  // colonne TTC x0=731.2
+  // "0,00 €" à x=453.7 (HT mission) et x=731.2 (TTC) — on écrase
+  W(totTTC.toFixed(2)+" €", 453, 950, 9, fb);   // col HT mission
+  W(totTTC.toFixed(2)+" €", 731, 950, 9, fb);   // col TTC
 
   // === BAS DE PAGE ===
-  // y0 exacts depuis le template:
-  // TOTAL GENERAL: y0=620.0, x=303.5
-  // AVANCE RECUE:  y0=588.2, x=303.5
-  // MONTANT REMB:  y0=560.1, x=303.5
-  // Date salarié:  y0=626.0, x=401.3
-  W(fmt(fiche.totals.grand), 303, 620, 11, fb);
-  W(fmt(fiche.totals.adv),   303, 588, 11, fn);
-  W(fmt(fiche.totals.remb),  303, 560, 11, fb);
-  W(new Date().toLocaleDateString("fr-FR"), 401, 626, 9, fn);
+  // "0,00 €" existants à x0=303.5 — on écrase exactement
+  W(fmt(fiche.totals.grand), 303, 620, 10, fb);
+  W(fmt(fiche.totals.adv),   303, 588, 10, fn);
+  W(fmt(fiche.totals.remb),  303, 560, 10, fb);
+  W(new Date().toLocaleDateString("fr-FR"), 422, 626, 9, fn);  // Date après "Date" x1=422.4
 
   // === SIGNATURE ===
   if(hasSig){
