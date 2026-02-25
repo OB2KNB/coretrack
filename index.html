@@ -355,7 +355,7 @@ function renderTrajets(){
         <div><label>N° EOTP</label><input class="tj" data-id="${t.id}" data-f="eotp" value="${t.eotp}" placeholder="ex: Mission Atelier Frans"/></div>
         <div><label>Date</label><input class="tj" data-id="${t.id}" data-f="date" value="${t.date}" placeholder="ex: 26/09/2025"/></div>
       </div>
-      <div style="margin-bottom:8px"><label>Nature du déplacement</label><input class="tj" data-id="${t.id}" data-f="nature" value="${t.nature}" placeholder="ex: Trajet retour Atelier-Domicile"/></div>
+      <div style="margin-bottom:8px"><label>Lieu de mission</label><input class="tj" data-id="${t.id}" data-f="nature" value="${t.nature}" placeholder="ex: EHP Golfech"/></div>
       <div class="row" style="margin-bottom:8px">
         <div><label>Lieu départ</label><input class="tj" data-id="${t.id}" data-f="depart" value="${t.depart}" placeholder="ex: ZA du Pardy Frans"/></div>
         <div><label>Lieu arrivée</label><input class="tj" data-id="${t.id}" data-f="arrivee" value="${t.arrivee}" placeholder="ex: 22 Rue du Portugal"/></div>
@@ -463,95 +463,116 @@ async function genPdf(fiche){
   pg(25);
   const doc=await PDFDocument.load(eb,{ignoreEncryption:true});
   const page=doc.getPages()[0];
-  // Dimensions exactes du template
-  const H=1588.7;
   const fn=await doc.embedFont(StandardFonts.Helvetica);
   const fb=await doc.embedFont(StandardFonts.HelveticaBold);
-  // W: x et yTop (depuis le haut), convertis en y pdf-lib (depuis le bas)
-  const W=(txt,x,yTop,sz=10,f=fn,col=rgb(0,0,0))=>{
-    if(txt===null||txt===undefined||txt==="") return;
-    page.drawText(String(txt),{x,y:H-yTop-sz+2,size:sz,font:f,color:col});
+  // W: coordonnées DIRECTES pdf-lib (x depuis gauche, y depuis le bas)
+  // y0_pdf = valeurs mesurées directement sur le template
+  const W=(txt,x,y,sz=10,f=fn,col=rgb(0,0,0))=>{
+    if(txt===null||txt===undefined||String(txt).trim()==="") return;
+    page.drawText(String(txt),{x,y,size:sz,font:f,color:col});
   };
   const p=fiche.profile;
 
   // === EN-TÊTE ===
-  W(p.last.toUpperCase(), 106, 118, 11, fb);   // NOM
-  W(p.first,              364, 120, 11, fn);   // Prénom
-  W(fiche.weekNum,        481, 120, 10, fn);   // Semaine
-  W(fiche.monthYear,      706, 118, 10, fn);   // Mois/année
+  // "NOM :" est à x0=57.8, y0=1455.5 → on écrit juste après à x=108
+  W(p.last.toUpperCase(), 108, 1455, 11, fb);
+  // "Prénom :" est à x0=311.8, y0=1454.6 → après à x=375
+  W(p.first,              375, 1454, 11, fn);
+  // Semaine : après "Prénom" vers x=490, même ligne
+  W(fiche.weekNum,        490, 1454, 10, fn);
+  // "Mois/" à y0=1461.5, "année:" à y0=1450.5 → on met au milieu
+  W(fiche.monthYear,      660, 1450, 10, fn);
+
+  // === IMMATRICULATION ===
+  // "N° Immatriculation véhicule :" x1=406.5, y0=1422
+  if(fiche.vehicleType==="perso"){
+    W(p.plate, 408, 1422, 10, fn);
+  }
 
   // === SECTION KM ===
-  if(fiche.vehicleType==="perso"){
-    W(p.plate, 402, 154, 10, fn);  // Immatriculation
-
-    // Lignes trajets — espacement ~22pts, 2 lignes par trajet
+  // En-têtes colonnes à y0=1400.5
+  // Lignes de données: 1ère ligne à y≈1380, espacement ~22pts
+  // Sur la fiche exemple: EOTP sur ligne 1 (y≈1380), date+nature+départ+arrivée+km sur ligne 2 (y≈1358)
+  if(fiche.vehicleType==="perso" && fiche.trajets.length>0){
+    const KM_ROWS = [
+      {y1:1375, y2:1353},
+      {y1:1331, y2:1309},
+      {y1:1287, y2:1265},
+      {y1:1243, y2:1221},
+    ];
     fiche.trajets.slice(0,4).forEach((t,i)=>{
-      const baseY = 197 + i*43;
-      W(t.eotp.substring(0,22),      173, baseY,    9, fn);  // EOTP
-      W(t.date,                      112, baseY+21, 9, fn);  // Date
-      W(t.nature.substring(0,32),    194, baseY+21, 9, fn);  // Nature
-      W(t.depart.substring(0,16),    395, baseY+17, 9, fn);  // Départ
-      W(t.arrivee.substring(0,16),   481, baseY+21, 9, fn);  // Arrivée
-      W(String(safe(t.km)),          638, baseY+22, 9, fn);  // KM
+      const r = KM_ROWS[i];
+      // Ligne 1: EOTP (nature mission = lieu)
+      W(t.nature.substring(0,28),  173, r.y1, 8, fn);
+      // Ligne 2: date, départ, arrivée, km, montant
+      W(t.date,                    112, r.y2, 8, fn);
+      W(t.depart.substring(0,16),  395, r.y2, 8, fn);
+      W(t.arrivee.substring(0,16), 492, r.y2, 8, fn);
+      W(String(safe(t.km)),        603, r.y2, 9, fn);
       const mont=safe(t.km)*T_KM;
-      if(mont>0) W(mont.toFixed(2), 706, baseY+22, 9, fn);  // Montant
+      if(mont>0) W(mont.toFixed(2), 710, r.y2, 9, fn);
     });
-    if(fiche.totals.tK>0) W(fiche.totals.tK.toFixed(2)+" €", 700, 276, 10, fb); // Total 1
+    // Total 1: y0=1296
+    if(fiche.totals.tK>0) W(fiche.totals.tK.toFixed(2)+" €", 695, 1296, 10, fb);
   }
 
   // === SECTION 2 : FRAIS EUROS ===
+  // Les tirets "-" dans le template sont aux y0: 1220.6, 1198.1, 1175.6, 1153.1, 1130.6, 1108.1, 1085.6, 1063.1, 1040.6, 1018.1, 995.6
+  // On écrit sur ces mêmes lignes
+  const S2_Y = [1220, 1197, 1175, 1152, 1130, 1107, 1085, 1062, 1040, 1017, 995];
+
   const lines=[];
   if(fiche.forfaits.nuit>0) lines.push({
     date: fiche.periode||"",
     enseigne:`forfait logement et petit dej ${T_NUIT.toFixed(2)} x ${fiche.forfaits.nuit}`,
-    ht:(fiche.forfaits.nuit*T_NUIT).toFixed(2)+" €",
     ttc:(fiche.forfaits.nuit*T_NUIT).toFixed(2)+" €"
   });
   if(fiche.forfaits.midi>0) lines.push({
     date:"",
     enseigne:`forfait repas midi ${T_MIDI.toFixed(2)}\u20ac x ${fiche.forfaits.midi}`,
-    ht:(fiche.forfaits.midi*T_MIDI).toFixed(2)+" €",
     ttc:(fiche.forfaits.midi*T_MIDI).toFixed(2)+" €"
   });
   if(fiche.forfaits.soir>0) lines.push({
     date:"",
     enseigne:`forfait repas soir ${T_SOIR.toFixed(2)}\u20ac x ${fiche.forfaits.soir}`,
-    ht:(fiche.forfaits.soir*T_SOIR).toFixed(2)+" €",
     ttc:(fiche.forfaits.soir*T_SOIR).toFixed(2)+" €"
   });
   fiche.peages.forEach(pg2=>lines.push({
     date:pg2.date||"",
-    enseigne:(pg2.enseigne||"Péage").substring(0,30),
-    ht:safe(pg2.montant).toFixed(2)+" €",
+    enseigne:(pg2.enseigne||"Péage").substring(0,32),
     ttc:safe(pg2.montant).toFixed(2)+" €"
   }));
 
-  // Première ligne section 2 : yTop=471, espacement=22pts
   lines.slice(0,11).forEach((l,i)=>{
-    const y = 471 + i*22;
-    W(fiche.eotp.substring(0,10), 60,  y, 8, fn);  // EOTP
-    W(l.date,                     112, y, 8, fn);  // Date
-    W(l.enseigne,                 192, y, 8, fn);  // Enseigne
-    W(l.ht,                       434, y, 8, fn);  // Montant HT
-    W(l.ttc,                      695, y, 8, fn);  // Montant TTC
+    const y=S2_Y[i];
+    W(fiche.eotp.substring(0,10), 55,  y, 8, fn);  // EOTP/Affaires x0=55.4
+    W(l.date,                     128, y, 8, fn);  // Date x0=127.9
+    W(l.enseigne,                 196, y, 8, fn);  // Enseigne x0=196.3 (après "Feuille")
+    W(l.ttc,                      695, y, 8, fn);  // Montant TTC x0=684.1
   });
 
-  // Total 2
+  // Total 2: y0=950.1
   const totTTC=fiche.totals.tF+fiche.totals.tP;
-  W(totTTC.toFixed(2)+" €", 434, 713, 10, fb);  // HT
-  W(totTTC.toFixed(2)+" €", 695, 713, 10, fb);  // TTC
+  W(totTTC.toFixed(2)+" €", 453, 950, 10, fb);  // colonne HT x0=453.7
+  W(totTTC.toFixed(2)+" €", 695, 950, 10, fb);  // colonne TTC x0=731.2
 
   // === BAS DE PAGE ===
-  W(fmt(fiche.totals.grand), 293, 1037, 11, fb);  // Total général
-  W(fmt(fiche.totals.adv),   299, 1068, 11, fn);  // Avance reçue
-  W(fmt(fiche.totals.remb),  293, 1096, 11, fb);  // Montant à rembourser
-  W(new Date().toLocaleDateString("fr-FR"), 511, 1029, 9, fn);  // Date salarié
+  // y0 exacts depuis le template:
+  // TOTAL GENERAL: y0=620.0, x=303.5
+  // AVANCE RECUE:  y0=588.2, x=303.5
+  // MONTANT REMB:  y0=560.1, x=303.5
+  // Date salarié:  y0=626.0, x=401.3
+  W(fmt(fiche.totals.grand), 303, 620, 11, fb);
+  W(fmt(fiche.totals.adv),   303, 588, 11, fn);
+  W(fmt(fiche.totals.remb),  303, 560, 11, fb);
+  W(new Date().toLocaleDateString("fr-FR"), 401, 626, 9, fn);
 
   // === SIGNATURE ===
   if(hasSig){
     const pb=await fetch(canvas.toDataURL("image/png")).then(r=>r.arrayBuffer());
     const png=await doc.embedPng(pb);
-    page.drawImage(png,{x:392,y:H-1085,width:275,height:54});
+    // Zone salarié: entre Date(y=626) et Visa(y=579), x≈400
+    page.drawImage(png,{x:400,y:582,width:270,height:52});
   }
 
   pg(60);
