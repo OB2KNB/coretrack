@@ -617,72 +617,33 @@ document.getElementById("generateOfficialPdf").addEventListener("click", async (
 
   // --- Justificatifs ---
 // --- Justificatifs (fix iPhone scroll + miniatures) ---
+// --- Justificatifs DEBUG ---
+const dbg = document.getElementById("dbg");
+function logDbg(msg){
+  if(dbg) dbg.innerHTML = msg;
+}
+
 const addReceiptBtn = document.getElementById("addReceiptBtn");
 const receiptInput  = document.getElementById("receiptInput");
 const receiptList   = document.getElementById("receiptList");
 
-let lastScrollY = 0;
+logDbg(`btn=${!!addReceiptBtn} input=${!!receiptInput} list=${!!receiptList}`);
 
-addReceiptBtn.addEventListener("click", () => {
-  lastScrollY = window.scrollY;     // mémorise la position
-  receiptInput.click();             // iPhone: plus fiable que <label for=...>
-});
-
-receiptInput.addEventListener("change", async (e) => {
-  const files = Array.from(e.target.files || []);
-  if (!files.length) {
-    // revient au scroll même si annulation
-    setTimeout(() => window.scrollTo(0, lastScrollY), 50);
-    return;
-  }
-
-  for (const file of files) {
-    const dataUrl = await new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result);
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-
-    receipts.push({ name: file.name || "justificatif.jpg", dataUrl });
-  }
-
-  renderReceipts();
-  receiptInput.value = ""; // important sur iPhone
-  setTimeout(() => window.scrollTo(0, lastScrollY), 50); // revient où tu étais
-});
-
-function renderReceipts(){
-  if(!receipts.length){
-    receiptList.innerHTML = `<div class="hint">Aucun justificatif ajouté.</div>`;
-    return;
-  }
-
-  receiptList.innerHTML = `
-    <div class="hint">✅ ${receipts.length} justificatif(s)</div>
-    <div class="list" style="margin-top:10px">
-      ${receipts.map((r,i)=>`
-        <div class="item">
-          <div class="itemTop">
-            <div class="mono">${(r.name||"")}</div>
-            <button class="btn danger" type="button" data-del="${i}">Supprimer</button>
-          </div>
-          <img src="${r.dataUrl}" style="width:100%;border-radius:12px;margin-top:10px;border:1px solid #2a2a2a" />
-        </div>
-      `).join("")}
-    </div>
-  `;
-
-  receiptList.querySelectorAll("[data-del]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      receipts.splice(Number(btn.dataset.del), 1);
-      renderReceipts();
-    });
+if(addReceiptBtn && receiptInput && receiptList){
+  addReceiptBtn.addEventListener("click", () => {
+    logDbg("CLICK OK → ouverture sélecteur…");
+    receiptInput.click();
   });
+
+  receiptInput.addEventListener("change", (e) => {
+    const n = (e.target.files || []).length;
+    logDbg(`CHANGE OK → ${n} fichier(s)`);
+    receiptList.innerHTML = `<div class="hint">✅ ${n} fichier(s) sélectionné(s)</div>`;
+    receiptInput.value = "";
+  });
+} else {
+  logDbg(`❌ Manque: ${!addReceiptBtn ? "addReceiptBtn " : ""}${!receiptInput ? "receiptInput " : ""}${!receiptList ? "receiptList " : ""}`);
 }
-
-renderReceipts();
-
 
 
   // ---------- History ----------
