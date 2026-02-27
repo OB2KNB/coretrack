@@ -35,24 +35,20 @@
     .btn.danger{border-color:#5a2222;background:#2a0f0f;color:#ff9a9a}
     .btn:disabled{opacity:.4;cursor:not-allowed}
     .sep{height:1px;background:#202020;margin:14px 0}
-    /* Forfaits */
     .forf-row{display:grid;grid-template-columns:1fr 90px 100px;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #1a1a1a}
     .forf-row:last-child{border-bottom:none}
     .forf-name{font-size:14px;font-weight:600}
     .forf-rate{font-size:12px;color:var(--muted);margin-top:3px}
     .forf-total{font-size:15px;font-weight:700;color:var(--accent);text-align:right}
-    /* Items dynamiques */
     .dyn-item{background:#0d0d0d;border:1px solid #252525;border-radius:10px;padding:12px;margin-bottom:10px;position:relative}
     .dyn-del{position:absolute;top:8px;right:8px;background:none;border:none;color:#555;font-size:22px;cursor:pointer;padding:0 4px;line-height:1}
     .dyn-del:hover{color:#ff6060}
-    /* Justificatifs */
     .rcpt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:12px}
     .rcpt-thumb{position:relative;border-radius:10px;overflow:hidden;border:1px solid #2a2a2a;aspect-ratio:3/4;background:#0d0d0d}
     .rcpt-thumb img{width:100%;height:100%;object-fit:cover}
     .rcpt-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.75);border:none;color:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
     .rcpt-num{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:10px;padding:3px;text-align:center}
     .cnt-badge{display:inline-block;background:var(--accent);color:#111;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px;vertical-align:middle}
-    /* Synthèse */
     .synth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
     .synth-box{background:#0d0d0d;border-radius:10px;padding:12px}
     .synth-lbl{font-size:12px;color:var(--muted);margin-bottom:4px}
@@ -92,24 +88,12 @@
   <div class="card">
     <h3>📋 Informations générales</h3>
     <div class="row">
-      <div>
-        <label>Numéro de semaine</label>
-        <input id="weekNum" placeholder="ex: S39" />
-      </div>
-      <div>
-        <label>Mois / Année</label>
-        <input id="monthYear" placeholder="ex: sept. 25" />
-      </div>
+      <div><label>Numéro de semaine</label><input id="weekNum" placeholder="ex: S39" /></div>
+      <div><label>Mois / Année</label><input id="monthYear" placeholder="ex: sept. 25" /></div>
     </div>
     <div class="row" style="margin-top:12px">
-      <div>
-        <label>N° EOTP / Chantier</label>
-        <input id="eotp" placeholder="ex: Mission Atelier Frans" />
-      </div>
-      <div>
-        <label>Avance reçue (€)</label>
-        <input id="advance" type="number" step="0.01" value="0" />
-      </div>
+      <div><label>N° EOTP / Chantier</label><input id="eotp" placeholder="ex: Mission Atelier Frans" /></div>
+      <div><label>Avance reçue (€)</label><input id="advance" type="number" step="0.01" value="0" /></div>
     </div>
   </div>
 
@@ -118,46 +102,30 @@
   <div class="card">
     <h3>🍽 Forfaits de la semaine</h3>
     <p class="hint" style="margin-bottom:14px">Entrez simplement le nombre — les montants se calculent automatiquement.</p>
-
-```
-<div class="forf-row">
-  <div>
-    <div class="forf-name">🌞 Repas midi</div>
-    <div class="forf-rate">19,40 € / repas</div>
-  </div>
-  <input id="qtyMidi" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
-  <div class="forf-total" id="lblMidi">0,00 €</div>
-</div>
-
-<div class="forf-row">
-  <div>
-    <div class="forf-name">🌙 Repas soir</div>
-    <div class="forf-rate">19,40 € / repas</div>
-  </div>
-  <input id="qtySoir" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
-  <div class="forf-total" id="lblSoir">0,00 €</div>
-</div>
-
-<div class="forf-row">
-  <div>
-    <div class="forf-name">🏨 Nuitée + petit déj</div>
-    <div class="forf-rate">50,80 € / nuit</div>
-  </div>
-  <input id="qtyNuit" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
-  <div class="forf-total" id="lblNuit">0,00 €</div>
-</div>
-
-<div class="sep"></div>
-<div style="display:flex;justify-content:space-between;align-items:center">
-  <span style="color:var(--muted);font-size:14px">Total forfaits</span>
-  <span style="font-size:20px;font-weight:800;color:var(--accent)" id="lblTotalForf">0,00 €</span>
-</div>
-<div style="margin-top:14px">
-  <label>Période (affiché sur la fiche)</label>
-  <input id="periode" placeholder="ex: Du 22/09/2025 au 26/09/2025" />
-</div>
-```
-
+    <div class="forf-row">
+      <div><div class="forf-name">🌞 Repas midi</div><div class="forf-rate">19,40 € / repas</div></div>
+      <input id="qtyMidi" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
+      <div class="forf-total" id="lblMidi">0,00 €</div>
+    </div>
+    <div class="forf-row">
+      <div><div class="forf-name">🌙 Repas soir</div><div class="forf-rate">19,40 € / repas</div></div>
+      <input id="qtySoir" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
+      <div class="forf-total" id="lblSoir">0,00 €</div>
+    </div>
+    <div class="forf-row">
+      <div><div class="forf-name">🏨 Nuitée + petit déj</div><div class="forf-rate">50,80 € / nuit</div></div>
+      <input id="qtyNuit" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
+      <div class="forf-total" id="lblNuit">0,00 €</div>
+    </div>
+    <div class="sep"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="color:var(--muted);font-size:14px">Total forfaits</span>
+      <span style="font-size:20px;font-weight:800;color:var(--accent)" id="lblTotalForf">0,00 €</span>
+    </div>
+    <div style="margin-top:14px">
+      <label>Période (affiché sur la fiche)</label>
+      <input id="periode" placeholder="ex: Du 22/09/2025 au 26/09/2025" />
+    </div>
   </div>
 
   <!-- Péages -->
@@ -317,7 +285,7 @@ $("resetProfile").addEventListener("click",()=>{localStorage.removeItem(KEY_P);l
 
 // PÉAGES
 let peages=[];
-function addPeage(d={}){peages.push({id:Date.now()+Math.random(),date:d.date||"",enseigne:d.enseigne||"Péage",depart:d.depart||"",arrivee:d.arrivee||"",montant:d.montant||0});renderPeages();}
+function addPeage(d={}){peages.push({id:Date.now()+Math.random(),date:d.date||"",depart:d.depart||"",arrivee:d.arrivee||"",montant:d.montant||0});renderPeages();}
 function renderPeages(){
   const c=$("peagesList");c.innerHTML="";
   peages.forEach(p=>{
@@ -327,7 +295,6 @@ function renderPeages(){
         <div><label>Date</label><input class="pg" data-id="${p.id}" data-f="date" value="${p.date}" placeholder="ex: 26/09/2025"/></div>
         <div><label>Montant TTC (€)</label><input class="pg" data-id="${p.id}" data-f="montant" type="number" step="0.01" value="${p.montant||""}" placeholder="ex: 50.20"/></div>
       </div>
-      <div style="margin-bottom:8px"><label>Nature / Enseigne</label><input class="pg" data-id="${p.id}" data-f="enseigne" value="${p.enseigne}" placeholder="ex: Péage A6 trajet retour"/></div>
       <div class="row">
         <div><label>Lieu départ</label><input class="pg" data-id="${p.id}" data-f="depart" value="${p.depart}" placeholder="ex: Lyon"/></div>
         <div><label>Lieu arrivée</label><input class="pg" data-id="${p.id}" data-f="arrivee" value="${p.arrivee}" placeholder="ex: Paris"/></div>
@@ -345,17 +312,16 @@ $("addPeageBtn").addEventListener("click",()=>addPeage());
 
 // TRAJETS KM
 let trajets=[];
-function addTrajet(d={}){trajets.push({id:Date.now()+Math.random(),eotp:d.eotp||"",date:d.date||"",nature:d.nature||"",depart:d.depart||"",arrivee:d.arrivee||"",km:d.km||0});renderTrajets();}
+function addTrajet(d={}){trajets.push({id:Date.now()+Math.random(),date:d.date||"",nature:d.nature||"",depart:d.depart||"",arrivee:d.arrivee||"",km:d.km||0});renderTrajets();}
 function renderTrajets(){
   const c=$("trajetsList");c.innerHTML="";
   trajets.forEach(t=>{
     const div=document.createElement("div");div.className="dyn-item";
     div.innerHTML=`<button class="dyn-del" data-id="${t.id}">×</button>
       <div class="row" style="margin-bottom:8px">
-        <div><label>N° EOTP</label><input class="tj" data-id="${t.id}" data-f="eotp" value="${t.eotp}" placeholder="ex: Mission Atelier Frans"/></div>
         <div><label>Date</label><input class="tj" data-id="${t.id}" data-f="date" value="${t.date}" placeholder="ex: 26/09/2025"/></div>
+        <div><label>Lieu de mission</label><input class="tj" data-id="${t.id}" data-f="nature" value="${t.nature}" placeholder="ex: EHP Golfech"/></div>
       </div>
-      <div style="margin-bottom:8px"><label>Lieu de mission</label><input class="tj" data-id="${t.id}" data-f="nature" value="${t.nature}" placeholder="ex: EHP Golfech"/></div>
       <div class="row" style="margin-bottom:8px">
         <div><label>Lieu départ</label><input class="tj" data-id="${t.id}" data-f="depart" value="${t.depart}" placeholder="ex: ZA du Pardy Frans"/></div>
         <div><label>Lieu arrivée</label><input class="tj" data-id="${t.id}" data-f="arrivee" value="${t.arrivee}" placeholder="ex: 22 Rue du Portugal"/></div>
@@ -453,147 +419,162 @@ function currentFiche(){
   };
 }
 
-// PDF
+// ═══════════════════════════════════════════════
+// PDF — coordonnées recalibrées pour nouveau template
+// Origine bas-gauche (pdf-lib = même repère que ReportLab)
+// ═══════════════════════════════════════════════
 async function genPdf(fiche){
   const {PDFDocument,StandardFonts,rgb}=PDFLib;
   pg(10);
   let eb;
-  try{eb=await fetch("./template.pdf").then(r=>{if(!r.ok)throw new Error("template.pdf introuvable");return r.arrayBuffer();});}
-  catch(e){throw new Error("Impossible de charger template.pdf — vérifiez qu'il est dans le repo.");}
+  try{
+    eb=await fetch("./template.pdf").then(r=>{
+      if(!r.ok)throw new Error("template.pdf introuvable");
+      return r.arrayBuffer();
+    });
+  }catch(e){throw new Error("Impossible de charger template.pdf — vérifiez qu'il est dans le repo.");}
   pg(25);
+
   const doc=await PDFDocument.load(eb,{ignoreEncryption:true});
   const page=doc.getPages()[0];
   const fn=await doc.embedFont(StandardFonts.Helvetica);
   const fb=await doc.embedFont(StandardFonts.HelveticaBold);
-  // W: coordonnées DIRECTES pdf-lib (x depuis gauche, y depuis le bas)
-  // y0_pdf = valeurs mesurées directement sur le template
-  const W=(txt,x,y,sz=10,f=fn,col=rgb(0,0,0))=>{
-    if(txt===null||txt===undefined||String(txt).trim()==="") return;
+  const BLUE=rgb(0,0.133,0.431);
+  const BLACK=rgb(0.1,0.1,0.18);
+  const WHITE=rgb(1,1,1);
+
+  // Écriture texte
+  const W=(txt,x,y,sz=9,f=fn,col=BLACK)=>{
+    if(txt===null||txt===undefined||String(txt).trim()==="")return;
     page.drawText(String(txt),{x,y,size:sz,font:f,color:col});
   };
-  // Effacer tous les "0,00 €" et "-" bleus existants avec des rectangles blancs
-  const blanc=rgb(1,1,1);
-  const eff=(x0,y0,x1,y1)=>page.drawRectangle({x:x0-1,y:y0-1,width:(x1-x0)+4,height:(y1-y0)+3,color:blanc,borderWidth:0});
-  // Total 1
-  eff(731.2,1296.0,761.8,1307.0);
-  // Tirets "-" section 2 (colonne TTC)
-  [[1220.6,1230.6],[1198.1,1208.1],[1175.6,1185.6],[1153.1,1163.1],[1130.6,1140.6],
-   [1108.1,1118.1],[1085.6,1095.6],[1063.1,1073.1],[1040.6,1050.6],[1018.1,1028.1],[995.6,1005.6]
-  ].forEach(([y0,y1])=>eff(685,y0,770,y1));
-  // Total 2 (4 colonnes)
-  eff(453.7,950.1,484.3,961.1);
-  eff(548.7,950.1,579.3,961.1);
-  eff(634.7,950.1,665.3,961.1);
-  eff(731.2,950.1,761.8,961.1);
-  // Totaux bas de page
-  eff(303.5,620.0,334.1,631.0);
-  eff(303.5,588.2,334.1,599.2);
-  eff(303.5,560.1,334.1,571.1);
+
+  // Effacement zone (rectangle blanc)
+  const eff=(x,y,w,h)=>page.drawRectangle({x,y,width:w,height:h,color:WHITE,borderWidth:0});
+
   const p=fiche.profile;
 
-  // === EN-TÊTE ===
-  // "NOM :" est à x0=57.8, y0=1455.5 → on écrit juste après à x=108
-  W(p.last.toUpperCase(), 108, 1455, 11, fb);
-  // "Prénom :" est à x0=311.8, y0=1454.6 → après à x=375
-  W(p.first,              375, 1454, 11, fn);
-  // Semaine : après "Prénom" vers x=490, même ligne
-  W(fiche.weekNum,        490, 1454, 10, fn);
-  // "Mois/" à y0=1461.5, "année:" à y0=1450.5 → on met au milieu
-  W(fiche.monthYear,      660, 1450, 10, fn);
+  // ═══ EN-TÊTE — y=758.3 ═══
+  W(p.last.toUpperCase(),  84,  758, 9, fb, BLACK);   // NOM (après label NOM x=32)
+  W(p.first,               215, 758, 9, fn, BLACK);   // Prénom
+  W(fiche.weekNum,         370, 758, 9, fn, BLACK);   // Semaine
+  W(fiche.monthYear,       444, 758, 9, fn, BLACK);   // Mois
+  // Année — si monthYear contient "25" ou "2025", on peut le réutiliser ou laisser vide
+  // (le champ monthYear contient déjà mois+année ex: "sept. 25")
 
-  // === IMMATRICULATION ===
-  // "N° Immatriculation véhicule :" x1=406.5, y0=1422
+  // ═══ IMMATRICULATION — y=725.7 ═══
   if(fiche.vehicleType==="perso"){
-    W(p.plate, 408, 1422, 10, fn);
+    W(p.plate, 135, 726, 9, fn, BLACK);
   }
 
-  // === SECTION KM ===
-  // En-têtes colonnes à y0=1400.5
-  // Lignes de données: 1ère ligne à y≈1380, espacement ~22pts
-  // Sur la fiche exemple: EOTP sur ligne 1 (y≈1380), date+nature+départ+arrivée+km sur ligne 2 (y≈1358)
+  // ═══ SECTION KM ═══
+  // 4 lignes disponibles, y: 694.5 / 678.9 / 663.3 / 647.7
+  const KM_Y=[694.5, 678.9, 663.3, 647.7];
   if(fiche.vehicleType==="perso" && fiche.trajets.length>0){
-    const KM_ROWS = [
-      {y1:1375, y2:1353},
-      {y1:1331, y2:1309},
-      {y1:1287, y2:1265},
-      {y1:1243, y2:1221},
-    ];
     fiche.trajets.slice(0,4).forEach((t,i)=>{
-      const r = KM_ROWS[i];
-      // Ligne 1: EOTP (nature mission = lieu)
-      W(t.nature.substring(0,28),  173, r.y1, 8, fn);
-      // Ligne 2: date, départ, arrivée, km, montant
-      W(t.date,                    112, r.y2, 8, fn);
-      W(t.depart.substring(0,16),  395, r.y2, 8, fn);
-      W(t.arrivee.substring(0,16), 492, r.y2, 8, fn);
-      W(String(safe(t.km)),        603, r.y2, 9, fn);
+      const y=KM_Y[i];
+      W(t.date,                       84,  y, 8, fn, BLACK);  // Date  x=83.6
+      W((t.nature||"").substring(0,22),129, y, 8, fn, BLACK);  // Nature déplacement x=129
+      W((t.depart||"").substring(0,14),271, y, 8, fn, BLACK);  // Lieu départ x=270.7
+      W((t.arrivee||"").substring(0,14),361,y, 8, fn, BLACK);  // Lieu arrivée x=361.4
+      W(String(safe(t.km)),            452, y, 8, fn, BLACK);  // Nb KM x=452
       const mont=safe(t.km)*T_KM;
-      if(mont>0) W(mont.toFixed(2), 710, r.y2, 9, fn);
+      if(mont>0) W(mont.toFixed(2)+" €", 500, y, 8, fb, BLUE); // Montant x=500
     });
-    // Total 1: y0=1296
-    if(fiche.totals.tK>0) W(fiche.totals.tK.toFixed(2)+" €", 695, 1296, 10, fb);
+    // TOTAL 1 — y=615.7
+    if(fiche.totals.tK>0){
+      eff(480,610,80,12);
+      W(fiche.totals.tK.toFixed(2)+" €", 483, 612, 9, fb, WHITE);
+    }
   }
 
-  // === SECTION 2 : FRAIS EUROS ===
-  // Les tirets "-" dans le template sont aux y0: 1220.6, 1198.1, 1175.6, 1153.1, 1130.6, 1108.1, 1085.6, 1063.1, 1040.6, 1018.1, 995.6
-  // On écrit sur ces mêmes lignes
-  const S2_Y = [1220, 1197, 1175, 1152, 1130, 1107, 1085, 1062, 1040, 1017, 995];
+  // ═══ SECTION FRAIS EUROS ═══
+  // 8 lignes, y: 568.3 / 552.8 / 537.2 / 521.6 / 506.0 / 490.4 / 474.8 / 459.2
+  const EUR_Y=[568.3,552.8,537.2,521.6,506.0,490.4,474.8,459.2];
 
   const lines=[];
   if(fiche.forfaits.nuit>0) lines.push({
-    date: fiche.periode||"",
-    enseigne:`forfait logement et petit dej ${T_NUIT.toFixed(2)} x ${fiche.forfaits.nuit}`,
+    desc:`Forfait logement + petit-dej x${fiche.forfaits.nuit}`,
+    tarif:T_NUIT.toFixed(2),
+    qte:String(fiche.forfaits.nuit),
     ttc:(fiche.forfaits.nuit*T_NUIT).toFixed(2)+" €"
   });
   if(fiche.forfaits.midi>0) lines.push({
-    date:"",
-    enseigne:`forfait repas midi ${T_MIDI.toFixed(2)}\u20ac x ${fiche.forfaits.midi}`,
+    desc:`Forfait repas midi x${fiche.forfaits.midi}`,
+    tarif:T_MIDI.toFixed(2),
+    qte:String(fiche.forfaits.midi),
     ttc:(fiche.forfaits.midi*T_MIDI).toFixed(2)+" €"
   });
   if(fiche.forfaits.soir>0) lines.push({
-    date:"",
-    enseigne:`forfait repas soir ${T_SOIR.toFixed(2)}\u20ac x ${fiche.forfaits.soir}`,
+    desc:`Forfait repas soir x${fiche.forfaits.soir}`,
+    tarif:T_SOIR.toFixed(2),
+    qte:String(fiche.forfaits.soir),
     ttc:(fiche.forfaits.soir*T_SOIR).toFixed(2)+" €"
   });
   fiche.peages.forEach(pg2=>lines.push({
-    date:pg2.date||"",
-    enseigne:(pg2.enseigne||"Péage").substring(0,32),
+    desc:"Frais divers / Forfait",
+    tarif:safe(pg2.montant).toFixed(2),
+    qte:"1",
     ttc:safe(pg2.montant).toFixed(2)+" €"
   }));
 
-  lines.slice(0,11).forEach((l,i)=>{
-    const y=S2_Y[i];
-    W(fiche.eotp.substring(0,10), 55,  y, 8, fn);  // Affaires x0=55.4
-    W(l.date,                     128, y, 8, fn);  // Date x0=127.9
-    W(l.enseigne,                 196, y, 8, fn);  // Enseigne
-    // Colonne "Montant TTC" header est à x0=684.1 — on écrit dessus
-    W(l.ttc,                      684, y, 8, fn);
+  lines.slice(0,8).forEach((l,i)=>{
+    const y=EUR_Y[i];
+    W((l.desc||"").substring(0,28), 33,  y, 7.5, fn, BLACK); // Description x=32.6
+    W(l.tarif,                      181, y, 7.5, fn, BLACK);  // Tarif x=180
+    W(l.qte,                        260, y, 7.5, fn, BLACK);  // Qté x=259.4
+    W(l.ttc,                        430, y, 7.5, fb, BLUE);   // Montant TTC (aligné droite zone)
   });
 
-  // Total 2 y0=950.1 — écraser les "0,00 €" existants exactement
+  // TOTAL 2 — y=442.8
   const totTTC=fiche.totals.tF+fiche.totals.tP;
-  // "0,00 €" à x=453.7 (HT mission) et x=731.2 (TTC) — on écrase
-  W(totTTC.toFixed(2)+" €", 453, 950, 9, fb);   // col HT mission
-  W(totTTC.toFixed(2)+" €", 731, 950, 9, fb);   // col TTC
+  if(totTTC>0){
+    eff(420,437,130,12);
+    W(totTTC.toFixed(2)+" €", 423, 439, 9, fb, WHITE);
+  }
 
-  // === BAS DE PAGE ===
-  // "0,00 €" existants à x0=303.5 — on écrase exactement
-  W(fmt(fiche.totals.grand), 303, 620, 10, fb);
-  W(fmt(fiche.totals.adv),   303, 588, 10, fn);
-  W(fmt(fiche.totals.remb),  303, 560, 10, fb);
-  W(new Date().toLocaleDateString("fr-FR"), 422, 626, 9, fn);  // Date après "Date" x1=422.4
+  // ═══ SECTION PÉAGES ═══
+  // 5 lignes, y: 395.4 / 379.8 / 364.3 / 348.7 / 333.1
+  const PEA_Y=[395.4,379.8,364.3,348.7,333.1];
+  fiche.peages.slice(0,5).forEach((pg2,i)=>{
+    const y=PEA_Y[i];
+    W((pg2.date||""),                    33,  y, 8, fn, BLACK);  // Date x=33
+    W((pg2.depart||"").substring(0,16),  90,  y, 8, fn, BLACK);  // Lieu départ x=90
+    W((pg2.arrivee||"").substring(0,16), 248, y, 8, fn, BLACK);  // Lieu arrivée x=248
+    if(safe(pg2.montant)>0)
+      W(safe(pg2.montant).toFixed(2)+" €", 430, y, 8, fb, BLUE); // Montant
+  });
 
-  // === SIGNATURE ===
+  // TOTAL 3 — y=316.6
+  if(fiche.totals.tP>0){
+    eff(420,311,130,12);
+    W(fiche.totals.tP.toFixed(2)+" €", 423, 313, 9, fb, WHITE);
+  }
+
+  // ═══ BAS DE PAGE ═══
+  // TOTAL GENERAL y=165.0
+  eff(155,159,120,12);
+  W(fmt(fiche.totals.grand), 158, 161, 9, fb, BLACK);
+
+  // AVANCE RECUE y=145.1
+  eff(155,139,120,12);
+  W(fmt(fiche.totals.adv), 158, 141, 9, fn, BLACK);
+
+  // MONTANT A REMBOURSER y=119.9
+  eff(155,114,120,12);
+  W(fmt(fiche.totals.remb), 158, 116, 9, fb, BLACK);
+
+  // ═══ SIGNATURE ═══
   if(hasSig){
     const pb=await fetch(canvas.toDataURL("image/png")).then(r=>r.arrayBuffer());
     const png=await doc.embedPng(pb);
-    // Zone salarié: entre Date(y=626) et Visa(y=579), x≈400
-    page.drawImage(png,{x:400,y:582,width:270,height:52});
+    // Zone signature salarié dans le bloc "Le Salarié"
+    page.drawImage(png,{x:200,y:88,width:140,height:40});
   }
 
   pg(60);
 
-  // JUSTIFICATIFS
+  // ═══ JUSTIFICATIFS ═══
   if(receipts.length>0){
     const gp=doc.addPage([595.28,841.89]);
     gp.drawText("Justificatifs",{x:40,y:800,size:18,font:fb,color:rgb(0,0,0)});
@@ -605,12 +586,21 @@ async function genPdf(fiche){
       const rp=doc.addPage([595.28,841.89]);
       pg(60+Math.round((i/receipts.length)*35));
       rp.drawText(`Justificatifs ${i+1}${receipts[i+1]?"-"+(i+2):""}/${receipts.length}  —  ${p.last} ${p.first}  ${fiche.weekNum}`,{x:30,y:820,size:9,font:fn,color:rgb(0.5,0.5,0.5)});
-      const emb=async r=>{const isJ=r.dataUrl.startsWith("data:image/jpeg")||r.dataUrl.startsWith("data:image/jpg");const b=await fetch(r.dataUrl).then(x=>x.arrayBuffer());return isJ?await doc.embedJpg(b):await doc.embedPng(b);};
+      const emb=async r=>{
+        const isJ=r.dataUrl.startsWith("data:image/jpeg")||r.dataUrl.startsWith("data:image/jpg");
+        const b=await fetch(r.dataUrl).then(x=>x.arrayBuffer());
+        return isJ?await doc.embedJpg(b):await doc.embedPng(b);
+      };
       try{const im=await emb(receipts[i]);const d=im.scaleToFit(515,350);rp.drawImage(im,{x:40,y:841.89-75-d.height,width:d.width,height:d.height});rp.drawText(`[${i+1}] ${receipts[i].name}`,{x:40,y:841.89-75-d.height-13,size:8,font:fn,color:rgb(0.5,0.5,0.5)});}catch(e){console.warn(e);}
       if(receipts[i+1]){try{const im=await emb(receipts[i+1]);const d=im.scaleToFit(515,340);rp.drawImage(im,{x:40,y:841.89-75-360-d.height,width:d.width,height:d.height});rp.drawText(`[${i+2}] ${receipts[i+1].name}`,{x:40,y:841.89-75-360-d.height-13,size:8,font:fn,color:rgb(0.5,0.5,0.5)});}catch(e){console.warn(e);}}
     }
   }
-  pg(97);const bytes=await doc.save();pg(100);setTimeout(()=>pg(0),600);return bytes;
+
+  pg(97);
+  const bytes=await doc.save();
+  pg(100);
+  setTimeout(()=>pg(0),600);
+  return bytes;
 }
 
 // BOUTON GÉNÉRER
