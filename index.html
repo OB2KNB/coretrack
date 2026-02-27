@@ -1,0 +1,573 @@
+<!doctype html>
+
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>CoreTrack</title>
+  <style>
+    :root{--bg:#0b0b0b;--panel:#111;--line:#222;--text:#f2f2f2;--muted:#b8b8b8;--btn:#1d1d1d;--btn2:#141414;--accent:#ff7a00;font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}
+    header{position:sticky;top:0;background:#111;border-bottom:1px solid var(--line);padding:12px 14px;z-index:10}
+    .brand{font-weight:800;font-size:18px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tab{border:1px solid #2a2a2a;background:var(--btn2);color:var(--text);padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px}
+    .tab.active{background:var(--btn);border-color:#3a3a3a}
+    main{padding:14px;max-width:980px;margin:0 auto}
+    .panel{display:none}.panel.active{display:block}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+    .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    @media(max-width:600px){.row{grid-template-columns:1fr}}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+    input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #2a2a2a;background:#0f0f0f;color:var(--text);font-size:15px}
+    h2{margin:6px 0 12px;font-size:20px}h3{margin:0 0 12px;font-size:16px}
+    .hint{color:var(--muted);font-size:13px;line-height:1.4}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{border:1px solid #2a2a2a;background:var(--btn);color:var(--text);padding:12px 16px;border-radius:12px;cursor:pointer;font-size:14px;-webkit-appearance:none;text-align:center}
+    .btn.primary{border-color:#ff9a3d;background:linear-gradient(180deg,#ff8a1c,#ff6f00);color:#111;font-weight:800;font-size:15px}
+    .btn.success{border-color:#1a5a2a;background:#0a2a10;color:#6adf8a}
+    .btn.danger{border-color:#5a2222;background:#2a0f0f;color:#ff9a9a}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .sep{height:1px;background:#202020;margin:14px 0}
+    .forf-row{display:grid;grid-template-columns:1fr 90px 100px;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #1a1a1a}
+    .forf-row:last-child{border-bottom:none}
+    .forf-name{font-size:14px;font-weight:600}.forf-rate{font-size:12px;color:var(--muted);margin-top:3px}
+    .forf-total{font-size:15px;font-weight:700;color:var(--accent);text-align:right}
+    .dyn-item{background:#0d0d0d;border:1px solid #252525;border-radius:10px;padding:12px;margin-bottom:10px;position:relative}
+    .dyn-del{position:absolute;top:8px;right:8px;background:none;border:none;color:#555;font-size:22px;cursor:pointer;padding:0 4px;line-height:1}
+    .dyn-del:hover{color:#ff6060}
+    .rcpt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:12px}
+    .rcpt-thumb{position:relative;border-radius:10px;overflow:hidden;border:1px solid #2a2a2a;aspect-ratio:3/4;background:#0d0d0d}
+    .rcpt-thumb img{width:100%;height:100%;object-fit:cover}
+    .rcpt-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.75);border:none;color:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+    .rcpt-num{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:10px;padding:3px;text-align:center}
+    .cnt-badge{display:inline-block;background:var(--accent);color:#111;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px;vertical-align:middle}
+    .synth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .synth-box{background:#0d0d0d;border-radius:10px;padding:12px}
+    .synth-lbl{font-size:12px;color:var(--muted);margin-bottom:4px}.synth-val{font-size:18px;font-weight:700}
+    .big-box{background:#0d0d0d;border-radius:12px;padding:14px;margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+    .big-lbl{font-size:15px;color:var(--muted)}.big-val{font-size:22px;font-weight:800}
+    canvas{width:100%;height:auto;border-radius:12px;border:1px dashed #2f2f2f;background:#0c0c0c;touch-action:none;display:block}
+    .list{display:grid;gap:10px}
+    .hist-item{border:1px solid #2a2a2a;background:#0f0f0f;border-radius:12px;padding:12px}
+    .hist-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+    .badge{font-size:12px;color:#111;background:#f2f2f2;border-radius:999px;padding:4px 10px;font-weight:700}
+    #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(120px);background:#1c1c1c;border:1px solid #333;color:#f2f2f2;padding:12px 22px;border-radius:12px;font-size:14px;transition:transform .3s;z-index:9999;pointer-events:none}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+    #pgbar{display:none;position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#ff7a00,#ffb347);z-index:9999;transition:width .3s}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+<div id="pgbar" style="width:0%"></div>
+<div id="toast"></div>
+<header>
+  <div class="brand">⚡ CoreTrack</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="new">Nouvelle fiche</button>
+    <button class="tab" data-tab="history">Historique</button>
+    <button class="tab" data-tab="profile">Profil</button>
+  </div>
+</header>
+<main>
+<section class="panel active" id="panel-new">
+  <h2>Nouvelle fiche</h2>
+  <div class="card">
+    <h3>📋 Informations générales</h3>
+    <div class="row">
+      <div><label>Numéro de semaine</label><input id="weekNum" placeholder="ex: S39" /></div>
+      <div><label>Mois / Année</label><input id="monthYear" placeholder="ex: sept. 25" /></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div><label>N° EOTP / Chantier</label><input id="eotp" placeholder="ex: Mission Atelier Frans" /></div>
+      <div><label>Avance reçue (€)</label><input id="advance" type="number" step="0.01" value="0" /></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🍽 Forfaits de la semaine</h3>
+    <p class="hint" style="margin-bottom:14px">Entrez simplement le nombre — les montants se calculent automatiquement.</p>
+    <div class="forf-row">
+      <div><div class="forf-name">🌞 Repas midi</div><div class="forf-rate">19,40 € / repas</div></div>
+      <input id="qtyMidi" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
+      <div class="forf-total" id="lblMidi">0,00 €</div>
+    </div>
+    <div class="forf-row">
+      <div><div class="forf-name">🌙 Repas soir</div><div class="forf-rate">19,40 € / repas</div></div>
+      <input id="qtySoir" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
+      <div class="forf-total" id="lblSoir">0,00 €</div>
+    </div>
+    <div class="forf-row">
+      <div><div class="forf-name">🏨 Nuitée + petit déj</div><div class="forf-rate">50,80 € / nuit</div></div>
+      <input id="qtyNuit" type="number" min="0" max="31" value="0" style="text-align:center;font-size:20px;font-weight:700" />
+      <div class="forf-total" id="lblNuit">0,00 €</div>
+    </div>
+    <div class="sep"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="color:var(--muted);font-size:14px">Total forfaits</span>
+      <span style="font-size:20px;font-weight:800;color:var(--accent)" id="lblTotalForf">0,00 €</span>
+    </div>
+    <div style="margin-top:14px"><label>Période (affiché sur la fiche)</label><input id="periode" placeholder="ex: Du 22/09/2025 au 26/09/2025" /></div>
+  </div>
+  <div class="card">
+    <h3>🛣 Péages &amp; frais divers</h3>
+    <p class="hint" style="margin-bottom:12px">Ajoutez chaque péage, parking ou frais divers séparément.</p>
+    <div id="peagesList"></div>
+    <button class="btn" id="addPeageBtn" type="button">+ Ajouter un péage / frais</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+      <span style="color:var(--muted);font-size:14px">Total péages &amp; divers</span>
+      <span style="font-size:18px;font-weight:700;color:var(--accent)" id="lblTotalPeages">0,00 €</span>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🚗 Kilométrique</h3>
+    <div class="row">
+      <div><label>Type de véhicule</label>
+        <select id="vehicleType">
+          <option value="perso">Véhicule personnel (0,35 €/km)</option>
+          <option value="fonction">Véhicule de fonction</option>
+        </select>
+      </div>
+      <div id="plateWrap"><label>N° Immatriculation</label><input id="plate" placeholder="ex: HA 641 GE" /></div>
+    </div>
+    <div id="kmSection" style="margin-top:14px">
+      <div id="trajetsList"></div>
+      <button class="btn" id="addTrajetBtn" type="button">+ Ajouter un trajet</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+        <span style="color:var(--muted);font-size:14px">Total km remboursé</span>
+        <span style="font-size:18px;font-weight:700;color:var(--accent)" id="lblTotalKm">0,00 €</span>
+      </div>
+    </div>
+    <p id="kmFonctionMsg" class="hint" style="display:none;margin-top:12px">✅ Véhicule de fonction — section kilométrique non applicable.</p>
+  </div>
+  <div class="card">
+    <h3>📊 Synthèse</h3>
+    <div class="synth-grid">
+      <div class="synth-box"><div class="synth-lbl">Forfaits</div><div class="synth-val" id="sForf">0,00 €</div></div>
+      <div class="synth-box"><div class="synth-lbl">Péages &amp; divers</div><div class="synth-val" id="sPeag">0,00 €</div></div>
+      <div class="synth-box"><div class="synth-lbl">Kilométrique</div><div class="synth-val" id="sKm">0,00 €</div></div>
+      <div class="synth-box"><div class="synth-lbl">Avance reçue</div><div class="synth-val" id="sAv">0,00 €</div></div>
+    </div>
+    <div class="big-box"><div class="big-lbl">Total général</div><div class="big-val" style="color:#6adf8a" id="sTotal">0,00 €</div></div>
+    <div class="big-box"><div class="big-lbl">Montant à rembourser</div><div class="big-val" style="color:var(--accent)" id="sRemb">0,00 €</div></div>
+    <p id="negWarn" class="hint" style="display:none;color:#ff9a9a;margin-top:8px">⚠️ Avance supérieure au total.</p>
+  </div>
+  <div class="card">
+    <h3>📎 Justificatifs <span id="rcptCount" class="cnt-badge" style="display:none">0</span></h3>
+    <p class="hint">Photos de tickets de péage, factures, reçus...</p>
+    <label class="btn" for="rcptInput" style="cursor:pointer;display:inline-block;margin-top:10px">📷 Ajouter des justificatifs</label>
+    <input type="file" id="rcptInput" accept="image/*" multiple style="display:none" />
+    <div id="rcptGrid" class="rcpt-grid"></div>
+  </div>
+  <div class="card">
+    <h3>✍️ Signature salarié</h3>
+    <canvas id="sig" width="900" height="260"></canvas>
+    <div class="btns"><button class="btn" id="clearSig" type="button">Effacer</button></div>
+  </div>
+  <div class="card">
+    <h3>🖨 Générer le PDF</h3>
+    <p class="hint" style="margin-bottom:14px">Fiche Framatome officielle remplie + justificatifs à la suite.<br/>Destinataire : <b id="recipientHint">jennifer.francois1@framatome.com</b></p>
+    <div class="btns">
+      <button class="btn primary" id="generatePdf" type="button">🖨 Générer le PDF officiel</button>
+      <button class="btn success" id="saveToHistory" type="button" disabled>💾 Enregistrer</button>
+    </div>
+  </div>
+</section>
+<section class="panel" id="panel-history">
+  <h2>Historique</h2>
+  <div class="card">
+    <div class="btns">
+      <button class="btn" id="exportBackup">⬆️ Exporter</button>
+      <label class="btn" style="cursor:pointer">⬇️ Importer<input id="importBackup" type="file" accept="application/json" hidden /></label>
+      <button class="btn danger" id="clearHistory">🗑 Vider</button>
+    </div>
+    <p class="hint" style="margin-top:10px">30 dernières fiches sauvegardées sur votre téléphone.</p>
+  </div>
+  <div id="historyList" class="list"></div>
+</section>
+<section class="panel" id="panel-profile">
+  <h2>Profil</h2>
+  <div class="card">
+    <div class="row">
+      <div><label>Nom</label><input id="pLast" placeholder="NOM" /></div>
+      <div><label>Prénom</label><input id="pFirst" placeholder="Prénom" /></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div><label>Immatriculation par défaut</label><input id="pPlate" placeholder="AA-123-BB" /></div>
+      <div><label>Email secrétaire</label><input id="pTo" type="email" value="jennifer.francois1@framatome.com" /></div>
+    </div>
+    <div class="btns">
+      <button class="btn primary" id="saveProfile">Enregistrer</button>
+      <button class="btn" id="resetProfile">Réinitialiser</button>
+    </div>
+    <div class="sep"></div>
+    <p class="hint">Profil sauvegardé sur le téléphone, prérempli automatiquement.</p>
+  </div>
+</section>
+</main>
+<script>
+const KEY_P="ct_profile_v3",KEY_H="ct_history_v3",HMAX=30;
+const T_MIDI=19.40,T_SOIR=19.40,T_NUIT=50.80,T_KM=0.35;
+const $=id=>document.getElementById(id);
+const fmt=n=>{const x=(Math.round((Number(n)||0)*100)/100).toFixed(2);return x.replace(".",",")+"\u00a0€";};
+const safe=v=>{const n=Number(String(v||"0").replace(",","."));return isFinite(n)?n:0;};
+const nowIso=()=>new Date().toISOString();
+function toast(msg,ms=2800){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),ms);}
+function pg(p){const b=$("pgbar");b.style.display=p>0&&p<100?"block":"none";b.style.width=p+"%";}
+document.querySelectorAll(".tab").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  $("panel-"+btn.dataset.tab).classList.add("active");
+  if(btn.dataset.tab==="history")renderHistory();
+  if(btn.dataset.tab==="profile")loadProfileUI();
+}));
+const loadP=()=>{try{return JSON.parse(localStorage.getItem(KEY_P)||"{}");}catch{return{};}};
+const saveP=p=>localStorage.setItem(KEY_P,JSON.stringify(p));
+function loadProfileUI(){const p=loadP();$("pLast").value=p.last||"";$("pFirst").value=p.first||"";$("pPlate").value=p.plate||"";$("pTo").value=p.to||"jennifer.francois1@framatome.com";}
+loadProfileUI();
+function applyProfile(){const p=loadP();if(p.plate&&!$("plate").value)$("plate").value=p.plate;$("recipientHint").textContent=p.to||"jennifer.francois1@framatome.com";}
+applyProfile();
+$("saveProfile").addEventListener("click",()=>{saveP({last:$("pLast").value.trim(),first:$("pFirst").value.trim(),plate:$("pPlate").value.trim(),to:$("pTo").value.trim()||"jennifer.francois1@framatome.com"});applyProfile();toast("✅ Profil enregistré");});
+$("resetProfile").addEventListener("click",()=>{localStorage.removeItem(KEY_P);loadProfileUI();toast("Profil réinitialisé");});
+let peages=[];
+function addPeage(d={}){peages.push({id:Date.now()+Math.random(),date:d.date||"",depart:d.depart||"",arrivee:d.arrivee||"",montant:d.montant||0});renderPeages();}
+function renderPeages(){
+  const c=$("peagesList");c.innerHTML="";
+  peages.forEach(p=>{
+    const div=document.createElement("div");div.className="dyn-item";
+    div.innerHTML=`<button class="dyn-del" data-id="${p.id}">×</button>
+      <div class="row" style="margin-bottom:8px">
+        <div><label>Date</label><input class="pg" data-id="${p.id}" data-f="date" value="${p.date}" placeholder="ex: 26/09/2025"/></div>
+        <div><label>Montant TTC (€)</label><input class="pg" data-id="${p.id}" data-f="montant" type="number" step="0.01" value="${p.montant||""}" placeholder="0.00"/></div>
+      </div>
+      <div class="row">
+        <div><label>Lieu départ</label><input class="pg" data-id="${p.id}" data-f="depart" value="${p.depart}" placeholder="ex: Lyon"/></div>
+        <div><label>Lieu arrivée</label><input class="pg" data-id="${p.id}" data-f="arrivee" value="${p.arrivee}" placeholder="ex: Paris"/></div>
+      </div>`;
+    c.appendChild(div);
+  });
+  c.querySelectorAll(".pg").forEach(i=>i.addEventListener("input",e=>{
+    const t=peages.find(x=>x.id===parseFloat(e.target.dataset.id));
+    if(t){t[e.target.dataset.f]=e.target.dataset.f==="montant"?safe(e.target.value):e.target.value;recalc();}
+  }));
+  c.querySelectorAll(".dyn-del").forEach(b=>b.addEventListener("click",e=>{peages=peages.filter(x=>x.id!==parseFloat(e.target.dataset.id));renderPeages();recalc();}));
+  recalc();
+}
+$("addPeageBtn").addEventListener("click",()=>addPeage());
+let trajets=[];
+function addTrajet(d={}){trajets.push({id:Date.now()+Math.random(),date:d.date||"",nature:d.nature||"",depart:d.depart||"",arrivee:d.arrivee||"",km:d.km||0});renderTrajets();}
+function renderTrajets(){
+  const c=$("trajetsList");c.innerHTML="";
+  trajets.forEach(t=>{
+    const div=document.createElement("div");div.className="dyn-item";
+    div.innerHTML=`<button class="dyn-del" data-id="${t.id}">×</button>
+      <div class="row" style="margin-bottom:8px">
+        <div><label>Date</label><input class="tj" data-id="${t.id}" data-f="date" value="${t.date}" placeholder="ex: 26/09/2025"/></div>
+        <div><label>Lieu de mission</label><input class="tj" data-id="${t.id}" data-f="nature" value="${t.nature}" placeholder="ex: EHP Golfech"/></div>
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <div><label>Lieu départ</label><input class="tj" data-id="${t.id}" data-f="depart" value="${t.depart}" placeholder="ex: Frans"/></div>
+        <div><label>Lieu arrivée</label><input class="tj" data-id="${t.id}" data-f="arrivee" value="${t.arrivee}" placeholder="ex: Golfech"/></div>
+      </div>
+      <div><label>Nombre de km</label><input class="tj" data-id="${t.id}" data-f="km" type="number" min="0" value="${t.km}"/></div>`;
+    c.appendChild(div);
+  });
+  c.querySelectorAll(".tj").forEach(i=>i.addEventListener("input",e=>{
+    const t=trajets.find(x=>x.id===parseFloat(e.target.dataset.id));
+    if(t){t[e.target.dataset.f]=e.target.dataset.f==="km"?safe(e.target.value):e.target.value;recalc();}
+  }));
+  c.querySelectorAll(".dyn-del").forEach(b=>b.addEventListener("click",e=>{trajets=trajets.filter(x=>x.id!==parseFloat(e.target.dataset.id));renderTrajets();recalc();}));
+  recalc();
+}
+$("addTrajetBtn").addEventListener("click",()=>addTrajet());
+$("vehicleType").addEventListener("change",()=>{
+  const perso=$("vehicleType").value==="perso";
+  $("kmSection").style.display=perso?"block":"none";
+  $("kmFonctionMsg").style.display=perso?"none":"block";
+  $("plateWrap").style.display=perso?"block":"none";
+  recalc();
+});
+["qtyMidi","qtySoir","qtyNuit","advance"].forEach(id=>$(id).addEventListener("input",recalc));
+function recalc(){
+  const midi=safe($("qtyMidi").value),soir=safe($("qtySoir").value),nuit=safe($("qtyNuit").value);
+  const tM=midi*T_MIDI,tS=soir*T_SOIR,tN=nuit*T_NUIT,tF=tM+tS+tN;
+  $("lblMidi").textContent=fmt(tM);$("lblSoir").textContent=fmt(tS);$("lblNuit").textContent=fmt(tN);$("lblTotalForf").textContent=fmt(tF);
+  const tP=peages.reduce((s,p)=>s+safe(p.montant),0);$("lblTotalPeages").textContent=fmt(tP);
+  const isP=$("vehicleType").value==="perso";
+  const totKm=isP?trajets.reduce((s,t)=>s+safe(t.km),0):0;
+  const tK=totKm*T_KM;$("lblTotalKm").textContent=fmt(tK);
+  const adv=safe($("advance").value),grand=tF+tP+tK,remb=grand-adv;
+  $("sForf").textContent=fmt(tF);$("sPeag").textContent=fmt(tP);$("sKm").textContent=fmt(tK);$("sAv").textContent=fmt(adv);
+  $("sTotal").textContent=fmt(grand);$("sRemb").textContent=fmt(remb);
+  $("negWarn").style.display=remb<0?"block":"none";
+}
+recalc();
+let drawing=false,hasSig=false;
+const canvas=$("sig"),ctx=canvas.getContext("2d");
+ctx.lineWidth=4;ctx.lineCap="round";ctx.strokeStyle="#f2f2f2";
+function gPos(e){const r=canvas.getBoundingClientRect(),tc=e.touches&&e.touches[0];return{x:((tc?tc.clientX:e.clientX)-r.left)*(canvas.width/r.width),y:((tc?tc.clientY:e.clientY)-r.top)*(canvas.height/r.height)};}
+canvas.addEventListener("mousedown",e=>{drawing=true;const p=gPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();});
+canvas.addEventListener("mousemove",e=>{if(!drawing)return;const p=gPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true;e.preventDefault();});
+window.addEventListener("mouseup",()=>drawing=false);
+canvas.addEventListener("touchstart",e=>{drawing=true;const p=gPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();},{passive:false});
+canvas.addEventListener("touchmove",e=>{if(!drawing)return;const p=gPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true;e.preventDefault();},{passive:false});
+canvas.addEventListener("touchend",()=>drawing=false);
+$("clearSig").addEventListener("click",()=>{ctx.clearRect(0,0,canvas.width,canvas.height);hasSig=false;});
+let receipts=[];
+$("rcptInput").addEventListener("change",async e=>{
+  for(const f of Array.from(e.target.files||[])){
+    const url=await new Promise(res=>{const r=new FileReader();r.onload=ev=>res(ev.target.result);r.readAsDataURL(f);});
+    receipts.push({dataUrl:url,name:f.name});
+  }
+  e.target.value="";renderReceipts();
+});
+function renderReceipts(){
+  const g=$("rcptGrid"),b=$("rcptCount");g.innerHTML="";
+  b.style.display=receipts.length?"inline-block":"none";b.textContent=receipts.length;
+  receipts.forEach((r,i)=>{
+    const div=document.createElement("div");div.className="rcpt-thumb";
+    div.innerHTML=`<img src="${r.dataUrl}"/><button class="rcpt-del" data-i="${i}">×</button><div class="rcpt-num">${i+1}</div>`;
+    div.querySelector(".rcpt-del").addEventListener("click",()=>{receipts.splice(i,1);renderReceipts();});
+    g.appendChild(div);
+  });
+}
+function currentFiche(){
+  const p=loadP();
+  const midi=safe($("qtyMidi").value),soir=safe($("qtySoir").value),nuit=safe($("qtyNuit").value);
+  const tF=midi*T_MIDI+soir*T_SOIR+nuit*T_NUIT;
+  const tP=peages.reduce((s,x)=>s+safe(x.montant),0);
+  const isP=$("vehicleType").value==="perso";
+  const totKm=isP?trajets.reduce((s,t)=>s+safe(t.km),0):0;
+  const tK=totKm*T_KM,adv=safe($("advance").value),grand=tF+tP+tK;
+  return{createdAt:nowIso(),profile:{last:p.last||"",first:p.first||"",plate:$("plate").value||p.plate||"",to:p.to||"jennifer.francois1@framatome.com"},
+    weekNum:$("weekNum").value.trim(),monthYear:$("monthYear").value.trim(),eotp:$("eotp").value.trim(),
+    periode:$("periode").value.trim(),vehicleType:$("vehicleType").value,
+    forfaits:{midi,soir,nuit,tF},peages:JSON.parse(JSON.stringify(peages)),
+    trajets:JSON.parse(JSON.stringify(trajets)),totals:{tF,tP,tK,totKm,grand,adv,remb:grand-adv}};
+}
+
+// ═══════════════════════════════════════════════════════════
+// PDF — coordonnées exactes recalibrées depuis le code source
+// du template.pdf (ReportLab, origine bas-gauche = même que pdf-lib)
+// ═══════════════════════════════════════════════════════════
+async function genPdf(fiche){
+const {PDFDocument,StandardFonts,rgb}=PDFLib;
+pg(10);
+let eb;
+try{eb=await fetch(”./template.pdf”).then(r=>{if(!r.ok)throw new Error(“template.pdf introuvable”);return r.arrayBuffer();});}
+catch(e){throw new Error(“Impossible de charger template.pdf — vérifiez qu’il est dans le repo.”);}
+pg(25);
+const doc=await PDFDocument.load(eb,{ignoreEncryption:true});
+const page=doc.getPages()[0];
+const fn=await doc.embedFont(StandardFonts.Helvetica);
+const fb=await doc.embedFont(StandardFonts.HelveticaBold);
+const BLUE=rgb(0,0.133,0.431);
+const BLACK=rgb(0.1,0.1,0.18);
+const WHITE=rgb(1,1,1);
+const ORANGE=rgb(1,0.302,0.016);
+
+// Écriture texte
+const W=(txt,x,y,sz=9,f=fn,col=BLACK)=>{
+if(txt===null||txt===undefined||String(txt).trim()===””)return;
+page.drawText(String(txt),{x,y,size:sz,font:f,color:col});
+};
+// Effacement rectangle blanc
+const E=(x,y,w,h)=>page.drawRectangle({x,y,width:w,height:h,color:WHITE,borderWidth:0});
+
+const p=fiche.profile;
+
+// ═══ INFOS SALARIÉ y=756.9 ═══
+W(p.last.toUpperCase(),        84,  757, 9, fb, BLACK);  // NOM valeur x=83.6
+W(p.first,                    220,  757, 9, fn, BLACK);  // Prénom valeur x=219.7
+W(fiche.weekNum,              373,  757, 9, fn, BLACK);  // Semaine x=372.8
+// Mois et Année séparés — on split monthYear si possible
+const parts = fiche.monthYear.split(” “);
+const mois = parts[0]||fiche.monthYear;
+const annee = parts[1]||””;
+W(mois,   447, 757, 9, fn, BLACK);  // Mois x=446.5
+W(annee,  526, 757, 9, fn, BLACK);  // Année x=525.8
+
+// ═══ IMMATRICULATION y=722.8 ═══
+if(fiche.vehicleType===“perso”){
+W(p.plate, 130, 723, 9, fn, BLACK);
+}
+
+// ═══ SECTION KM ═══
+// Lignes y: 691.7 / 676.1 / 660.5 / 644.9
+const KM_Y=[691.7,676.1,660.5,644.9];
+if(fiche.vehicleType===“perso”&&fiche.trajets.length>0){
+fiche.trajets.slice(0,4).forEach((t,i)=>{
+const y=KM_Y[i];
+W((t.date||””).substring(0,10),         84,  y, 8, fn, BLACK);  // Date x=83.6
+W((t.nature||””).substring(0,20),       129, y, 8, fn, BLACK);  // Nature x=129
+W((t.depart||””).substring(0,13),       271, y, 8, fn, BLACK);  // Départ x=270.7
+W((t.arrivee||””).substring(0,13),      361, y, 8, fn, BLACK);  // Arrivée x=361.4
+W(String(safe(t.km)),                   452, y, 8, fn, BLACK);  // NbKM x=452.1
+const mont=safe(t.km)*T_KM;
+if(mont>0) W(mont.toFixed(2),           505, y, 8, fb, BLUE);   // Montant x=505
+});
+// TOTAL 1 y=628.4, right_x=559.8
+if(fiche.totals.tK>0){
+E(430,623,130,12);
+W(fiche.totals.tK.toFixed(2)+” EUR”, 432, 625, 9, fb, WHITE);
+}
+}
+
+// ═══ FRAIS EUROS ═══
+// Colonnes: Desc x=32.6 | Tarif x=180 | Qte x=259.4 | MontHT x=321.7 | MontTTC right=562.7
+// Lignes y: 579.7 / 564.1 / 548.5 / 532.9 / 517.3 / 501.7 / 486.1 / 470.6
+const EUR_Y=[579.7,564.1,548.5,532.9,517.3,501.7,486.1,470.6];
+const lines=[];
+if(fiche.forfaits.nuit>0) lines.push({desc:`Forfait logement+pdj x${fiche.forfaits.nuit}`,tarif:T_NUIT.toFixed(2),qte:String(fiche.forfaits.nuit),ttc:(fiche.forfaits.nuit*T_NUIT).toFixed(2)});
+if(fiche.forfaits.midi>0) lines.push({desc:`Forfait repas midi x${fiche.forfaits.midi}`,tarif:T_MIDI.toFixed(2),qte:String(fiche.forfaits.midi),ttc:(fiche.forfaits.midi*T_MIDI).toFixed(2)});
+if(fiche.forfaits.soir>0) lines.push({desc:`Forfait repas soir x${fiche.forfaits.soir}`,tarif:T_SOIR.toFixed(2),qte:String(fiche.forfaits.soir),ttc:(fiche.forfaits.soir*T_SOIR).toFixed(2)});
+fiche.peages.forEach(pg2=>lines.push({desc:“Frais divers”,tarif:safe(pg2.montant).toFixed(2),qte:“1”,ttc:safe(pg2.montant).toFixed(2)}));
+
+lines.slice(0,8).forEach((l,i)=>{
+const y=EUR_Y[i];
+W((l.desc||””).substring(0,26), 33,  y, 7.5, fn, BLACK);  // Description
+W(l.tarif,                      180, y, 7.5, fn, BLACK);  // Tarif unitaire
+W(l.qte,                        259, y, 7.5, fn, BLACK);  // Quantité
+// Montant TTC aligné droite dans sa colonne (right_x=562.7)
+const wTTC = fb.widthOfTextAtSize(l.ttc, 7.5);
+W(l.ttc, 562-wTTC, y, 7.5, fb, BLUE);  // Montant TTC
+});
+
+// TOTAL 2 y=454.1, right_x=559.8
+const totTTC=fiche.totals.tF+fiche.totals.tP;
+if(totTTC>0){
+E(400,449,160,12);
+const t2=totTTC.toFixed(2)+” EUR”;
+const wt2=fb.widthOfTextAtSize(t2,9);
+W(t2, 558-wt2, 451, 9, fb, WHITE);
+}
+
+// ═══ PÉAGES ═══
+// Colonnes: Date x=32.6 | Départ x=95 | Arrivée x=250.9 | MontTTC right=562.7
+// Lignes y: 405.4 / 389.8 / 374.2 / 358.6 / 343.0
+const PEA_Y=[405.4,389.8,374.2,358.6,343.0];
+fiche.peages.slice(0,5).forEach((pg2,i)=>{
+const y=PEA_Y[i];
+W((pg2.date||””),                      33,  y, 8, fn, BLACK);
+W((pg2.depart||””).substring(0,18),    95,  y, 8, fn, BLACK);
+W((pg2.arrivee||””).substring(0,18),   251, y, 8, fn, BLACK);
+if(safe(pg2.montant)>0){
+const mt=safe(pg2.montant).toFixed(2);
+const wmt=fb.widthOfTextAtSize(mt,8);
+W(mt, 562-wmt, y, 8, fb, BLUE);
+}
+});
+
+// TOTAL 3 y=326.6
+if(fiche.totals.tP>0){
+E(400,321,160,12);
+const t3=fiche.totals.tP.toFixed(2)+” EUR”;
+const wt3=fb.widthOfTextAtSize(t3,9);
+W(t3, 558-wt3, 323, 9, fb, WHITE);
+}
+
+// ═══ BAS DE PAGE ═══
+// TOTAL GENERAL y=174.9, montant zone x=189.9
+E(148,169,155,12);
+W(fmt(fiche.totals.grand), 150, 171, 9, fb, BLACK);
+
+// AVANCE RECUE y=155.1
+E(148,150,155,12);
+W(fmt(fiche.totals.adv), 150, 152, 9, fn, BLACK);
+
+// MONTANT A REMBOURSER y=129.8
+E(148,124,155,12);
+W(fmt(fiche.totals.remb), 150, 126, 9, fb, BLACK);
+
+// ═══ SIGNATURE — zone salarié x=283.5 à 425.2, y=105 à 155 ═══
+if(hasSig){
+const pb=await fetch(canvas.toDataURL(“image/png”)).then(r=>r.arrayBuffer());
+const png=await doc.embedPng(pb);
+page.drawImage(png,{x:290,y:108,width:130,height:45});
+}
+
+pg(60);
+
+// ═══ JUSTIFICATIFS ═══
+if(receipts.length>0){
+const gp=doc.addPage([595.28,841.89]);
+gp.drawText(“Justificatifs”,{x:40,y:800,size:18,font:fb,color:rgb(0,0,0)});
+gp.drawText(`${p.last} ${p.first}  —  ${fiche.weekNum} ${fiche.monthYear}`,{x:40,y:775,size:11,font:fn,color:rgb(0.35,0.35,0.35)});
+gp.drawText(`${receipts.length} pièce(s) jointe(s)`,{x:40,y:755,size:10,font:fn,color:rgb(0.45,0.45,0.45)});
+gp.drawLine({start:{x:40,y:745},end:{x:555,y:745},thickness:0.8,color:rgb(0.75,0.75,0.75)});
+for(let i=0;i<receipts.length;i+=2){
+const rp=doc.addPage([595.28,841.89]);
+pg(60+Math.round((i/receipts.length)*35));
+rp.drawText(`Justificatifs ${i+1}${receipts[i+1]?"-"+(i+2):""}/${receipts.length}  —  ${p.last} ${p.first}  ${fiche.weekNum}`,{x:30,y:820,size:9,font:fn,color:rgb(0.5,0.5,0.5)});
+const emb=async r=>{const isJ=r.dataUrl.startsWith(“data:image/jpeg”)||r.dataUrl.startsWith(“data:image/jpg”);const b=await fetch(r.dataUrl).then(x=>x.arrayBuffer());return isJ?await doc.embedJpg(b):await doc.embedPng(b);};
+try{const im=await emb(receipts[i]);const d=im.scaleToFit(515,350);rp.drawImage(im,{x:40,y:841.89-75-d.height,width:d.width,height:d.height});rp.drawText(`[${i+1}] ${receipts[i].name}`,{x:40,y:841.89-75-d.height-13,size:8,font:fn,color:rgb(0.5,0.5,0.5)});}catch(e){console.warn(e);}
+if(receipts[i+1]){try{const im=await emb(receipts[i+1]);const d=im.scaleToFit(515,340);rp.drawImage(im,{x:40,y:841.89-75-360-d.height,width:d.width,height:d.height});rp.drawText(`[${i+2}] ${receipts[i+1].name}`,{x:40,y:841.89-75-360-d.height-13,size:8,font:fn,color:rgb(0.5,0.5,0.5)});}catch(e){console.warn(e);}}
+}
+}
+pg(97);const bytes=await doc.save();pg(100);setTimeout(()=>pg(0),600);return bytes;
+}
+
+let lastBytes=null,lastFiche=null;
+$(“generatePdf”).addEventListener(“click”,async()=>{
+const fiche=currentFiche();
+if(!fiche.weekNum){toast(“⚠️ Renseigne le numéro de semaine”);return;}
+if(!hasSig){toast(“⚠️ Signe la fiche avant de générer”);return;}
+const btn=$(“generatePdf”);btn.disabled=true;btn.textContent=“⏳ Génération…”;
+try{
+lastFiche=fiche;lastBytes=await genPdf(fiche);
+const nm=[fiche.profile.last,fiche.profile.first].filter(Boolean).join(”*”)||“NOM”;
+dlPdf(lastBytes,`CoreTrack_${fiche.weekNum}_${fiche.monthYear}_${nm}.pdf`.replace(/[^\w-.]+/g,”*”));
+$(“saveToHistory”).disabled=false;toast(“✅ PDF généré !”);
+}catch(e){toast(“❌ “+e.message,6000);console.error(e);}
+btn.disabled=false;btn.textContent=“🖨 Générer le PDF officiel”;
+});
+function dlPdf(bytes,fname){
+const blob=new Blob([bytes],{type:“application/pdf”});
+const url=URL.createObjectURL(blob);const a=document.createElement(“a”);a.href=url;a.download=fname;
+document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+const loadH=()=>{try{return JSON.parse(localStorage.getItem(KEY_H)||”[]”);}catch{return[];}};
+const saveH=arr=>localStorage.setItem(KEY_H,JSON.stringify(arr.slice(0,HMAX)));
+$(“saveToHistory”).addEventListener(“click”,()=>{
+if(!lastFiche||!lastBytes){toast(“Génère d’abord le PDF”);return;}
+const e={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),createdAt:lastFiche.createdAt,week:`${lastFiche.weekNum} ${lastFiche.monthYear}`,site:lastFiche.eotp,total:lastFiche.totals.grand,toRefund:lastFiche.totals.remb,pdfBase64:btoa(String.fromCharCode(…new Uint8Array(lastBytes))),meta:lastFiche};
+const h=loadH();h.unshift(e);saveH(h);toast(“✅ Enregistré”);$(“saveToHistory”).disabled=true;
+});
+function b64b(b64){const bin=atob(b64),b=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return b;}
+function renderHistory(){
+const list=$(“historyList”),hist=loadH();
+if(!hist.length){list.innerHTML=`<div class="card"><p class="hint">Aucune fiche enregistrée.</p></div>`;return;}
+list.innerHTML=””;
+hist.forEach(e=>{
+const d=new Date(e.createdAt),el=document.createElement(“div”);el.className=“hist-item”;
+el.innerHTML=`<div class="hist-top"><div><b>${e.week||"—"}</b> — ${e.site||"chantier"}</div><div class="badge">${fmt(e.toRefund)}</div></div> <div class="hint" style="margin-top:6px">${d.toLocaleDateString("fr-FR")} ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})} • Total ${fmt(e.total)}</div> <div class="btns" style="margin-top:10px"><button class="btn" data-a="dl">⬇️ PDF</button><button class="btn" data-a="dup">📋 Dupliquer</button><button class="btn danger" data-a="del">🗑</button></div>`;
+el.querySelector(’[data-a=“dl”]’).addEventListener(“click”,()=>dlPdf(b64b(e.pdfBase64),`CoreTrack_${(e.week||"fiche").replace(/\s+/g,"_")}.pdf`));
+el.querySelector(’[data-a=“dup”]’).addEventListener(“click”,()=>{
+document.querySelector(’.tab[data-tab=“new”]’).click();const m=e.meta;
+$(“weekNum”).value=m.weekNum||””;$(“monthYear”).value=m.monthYear||””;$(“eotp”).value=m.eotp||””;$(“periode”).value=m.periode||””;
+$(“advance”).value=m.totals?.adv||0;$(“vehicleType”).value=m.vehicleType||“perso”;$(“plate”).value=m.profile?.plate||””;
+$(“qtyMidi”).value=m.forfaits?.midi||0;$(“qtySoir”).value=m.forfaits?.soir||0;$(“qtyNuit”).value=m.forfaits?.nuit||0;
+$(“kmSection”).style.display=m.vehicleType===“perso”?“block”:“none”;$(“kmFonctionMsg”).style.display=m.vehicleType===“perso”?“none”:“block”;
+peages=(m.peages||[]).map(p=>({…p,id:Date.now()+Math.random()}));
+trajets=(m.trajets||[]).map(t=>({…t,id:Date.now()+Math.random()}));
+renderPeages();renderTrajets();ctx.clearRect(0,0,canvas.width,canvas.height);hasSig=false;$(“saveToHistory”).disabled=true;recalc();toast(“Fiche dupliquée !”);
+});
+el.querySelector(’[data-a=“del”]’).addEventListener(“click”,()=>{if(!confirm(“Supprimer ?”))return;saveH(loadH().filter(h=>h.id!==e.id));renderHistory();});
+list.appendChild(el);
+});
+}
+$(“clearHistory”).addEventListener(“click”,()=>{if(!confirm(“Vider tout l’historique ?”))return;localStorage.removeItem(KEY_H);renderHistory();});
+$(“exportBackup”).addEventListener(“click”,()=>{
+const blob=new Blob([JSON.stringify({version:3,exportedAt:nowIso(),profile:loadP(),history:loadH()},null,2)],{type:“application/json”});
+const url=URL.createObjectURL(blob);const a=document.createElement(“a”);a.href=url;a.download=“coretrack_backup.json”;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+});
+$(“importBackup”).addEventListener(“change”,async e=>{
+const f=e.target.files&&e.target.files[0];if(!f)return;
+let pl;try{pl=JSON.parse(await f.text());}catch{toast(“❌ Fichier invalide”);return;}
+if(pl.profile)saveP(pl.profile);if(Array.isArray(pl.history))saveH(pl.history);
+toast(“✅ Sauvegarde importée”);renderHistory();
+});
+</script>
+
+</body>
+</html>
